@@ -16,6 +16,8 @@ from grip_and_record.robot_utils import Orientations
 import numpy as np
 import time
 
+from get_data import GetData
+
 from std_msgs.msg import Float32MultiArray
 
 from intera_core_msgs.msg import EndpointState
@@ -120,19 +122,19 @@ def goto_EE_xyz(limb, xyz, orientation=Orientations.DOWNWARD_ROTATED, verbosity=
             goto_rest_pos(limb)
 
 
-def sub_pcf_sensor():
-    rospy.Subscriber("/sensor_values", Float32MultiArray, pcf_callback)
-    rospy.spin()
-
-def pcf_callback(data):
-    print(data.data)
-
-def sub_ft_sensor():
-    rospy.Subscriber("/robot/limb/right/endpoint_state", EndpointState, ft_callback)
-    rospy.spin()
-
-def ft_callback(data):
-    print(data.wrench.force.x)
+# def sub_pcf_sensor():
+#     rospy.Subscriber("/sensor_values", Float32MultiArray, pcf_callback)
+#     rospy.spin()
+#
+# def pcf_callback(data):
+#     print(data.data)
+#
+# def sub_ft_sensor():
+#     rospy.Subscriber("/robot/limb/right/endpoint_state", EndpointState, ft_callback)
+#     rospy.spin()
+#
+# def ft_callback(data):
+#     print(data.wrench.force.x)
 
 
 
@@ -143,21 +145,26 @@ def main():
     limb = init_robot(limb_name=limb_name)
 
     # sub_pcf_sensor()
+    # sub_ft_sensor()
 
-    sub_ft_sensor()
+    gd = GetData()
+    gd.start_recording()
 
-    # while True:
-    #     goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_RIGHT, rest_pos=True)
-    #     goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_LEFT , rest_pos=True)
-    #
-    #     # Neutral position
-    #     goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.FORWARD_POINT, rest_pos=True)
-    #
-    #     goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_FRONT, rest_pos=True)
-    #     goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
-    #
-    #     # Neutral position
-    #     goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+    for _ in range(3):
+        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_RIGHT, rest_pos=True)
+        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_LEFT , rest_pos=True)
+
+        # Neutral position
+        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+
+        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_FRONT, rest_pos=True)
+        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
+
+        # Neutral position
+        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+
+    gd.stop_recording()
+    gd.convertandsave()
 
 
 
