@@ -71,7 +71,7 @@ def goto_rest_pos(limb, verbosity=1):
     :param verbosity: verbosity level. >0 print stuff
     :return:
     """
-    xyz_rest = [0.8, 0.0, 0.3]
+    xyz_rest = [0.7, 0.0, 0.4]
     if verbosity > 0:
         rp = intera_interface.RobotParams()  # For logging
         rp.log_message('Moving to rest position')
@@ -122,46 +122,26 @@ def goto_EE_xyz(limb, xyz, orientation=Orientations.DOWNWARD_ROTATED, verbosity=
             goto_rest_pos(limb)
 
 
-# def sub_pcf_sensor():
-#     rospy.Subscriber("/sensor_values", Float32MultiArray, pcf_callback)
-#     rospy.spin()
-#
-# def pcf_callback(data):
-#     print(data.data)
-#
-# def sub_ft_sensor():
-#     rospy.Subscriber("/robot/limb/right/endpoint_state", EndpointState, ft_callback)
-#     rospy.spin()
-#
-# def ft_callback(data):
-#     print(data.wrench.force.x)
-
-
-
-
 def main():
     # Make required initiations
     limb_name = "right"
     limb = init_robot(limb_name=limb_name)
 
-    # sub_pcf_sensor()
-    # sub_ft_sensor()
-
     gd = GetData()
     gd.start_recording()
 
-    for _ in range(3):
-        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_RIGHT, rest_pos=True)
-        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_LEFT , rest_pos=True)
+    for _ in range(1):
+        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_RIGHT, rest_pos=True)
+        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_LEFT , rest_pos=True)
 
         # Neutral position
-        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.FORWARD_POINT, rest_pos=True)
 
-        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_FRONT, rest_pos=True)
-        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
+        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_FRONT, rest_pos=True)
+        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
 
         # Neutral position
-        goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.FORWARD_POINT, rest_pos=True)
 
     gd.stop_recording()
     gd.convertandsave()

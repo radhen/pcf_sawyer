@@ -6,7 +6,7 @@ import rospy
 from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimension
 
 
-def collect_data(port='/dev/ttyACM0'):
+def collect_data(port='/dev/ttyACM1'):
     with serial.Serial(port, 2000000, timeout=0.1) as ser:
         ser.flushInput()
         # Give it some time to initialize
