@@ -66,15 +66,15 @@ class GetData(object):
         self.gripperAperture = np.loadtxt('gripperAperture.txt')
         self.centeringerr = np.loadtxt('centeringerr.txt')
 
-    def convertandsave(self):
+    def convertandsave(self,i):
         # convert to numpy array and save
         path = '/home/radhen/Documents/expData'
 
         # self.pcf_baro = np.array(self.pcf_baro)
-        np.savetxt(path+'/pcf_data.txt', self.pcf_data)
+        np.savetxt(path+'/pcf_data_{}.txt'.format(i), self.pcf_data)
 
         # self.fx = np.array(self.fx)
-        np.savetxt(path+'/endeff_data.txt', self.endeff_data)
+        np.savetxt(path+'/endeff_data_{}.txt'.format(i), self.endeff_data)
 
 
 

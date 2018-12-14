@@ -58,7 +58,7 @@ def init_robot(limb_name):
     limb = intera_interface.Limb(limb_name)
     limb.set_joint_position_speed(0.05)
     # Move to a safe position
-    goto_rest_pos(limb=limb)
+    # goto_rest_pos(limb=limb)
 
     return limb
 
@@ -71,7 +71,7 @@ def goto_rest_pos(limb, verbosity=1):
     :param verbosity: verbosity level. >0 print stuff
     :return:
     """
-    xyz_rest = [0.7, 0.0, 0.4]
+    xyz_rest = [0.7, 0.0, 0.11]
     if verbosity > 0:
         rp = intera_interface.RobotParams()  # For logging
         rp.log_message('Moving to rest position')
@@ -127,24 +127,34 @@ def main():
     limb_name = "right"
     limb = init_robot(limb_name=limb_name)
 
-    gd = GetData()
-    gd.start_recording()
+    goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.095], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
 
-    for _ in range(1):
-        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_RIGHT, rest_pos=True)
-        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_LEFT , rest_pos=True)
+    # gd = GetData()
+    # gd.start_recording()
 
-        # Neutral position
-        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+    # for _ in range(10):
+    #     goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.06], orientation=Orientations.SLIGHT_RIGHT, rest_pos=True)
+    #     goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.06], orientation=Orientations.SLIGHT_LEFT , rest_pos=True)
+    #
+    #     # Neutral position
+    #     goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.06], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+    #
+    #     goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.06], orientation=Orientations.SLIGHT_FRONT, rest_pos=True)
+    #     goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.06], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
+    #
+    #     # Neutral position
+    #     goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.06], orientation=Orientations.FORWARD_POINT, rest_pos=True)
 
-        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_FRONT, rest_pos=True)
-        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
+    # gd.stop_recording()
+    # gd.convertandsave(2)
 
-        # Neutral position
-        goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.4], orientation=Orientations.FORWARD_POINT, rest_pos=True)
+    # goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.06], orientation=Orientations.FORWARD_POINT, rest_pos=True)
 
-    gd.stop_recording()
-    gd.convertandsave()
+
+    # IMPEDANCE CONTROL THAT I WISH TO IMPLEMENT
+    # https://rethinkrobotics.interaforum.com/topic/569-endpoint-impedance-control-for-sawyer-intera-52/
+
+
 
 
 
