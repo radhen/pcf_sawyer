@@ -71,7 +71,7 @@ def goto_rest_pos(limb, verbosity=1):
     :param verbosity: verbosity level. >0 print stuff
     :return:
     """
-    xyz_rest = [0.7, 0.0, 0.11]
+    xyz_rest = [0.7, 0.0, 0.15]
     if verbosity > 0:
         rp = intera_interface.RobotParams()  # For logging
         rp.log_message('Moving to rest position')
@@ -127,7 +127,7 @@ def main():
     limb_name = "right"
     limb = init_robot(limb_name=limb_name)
 
-    goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.095], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
+    goto_EE_xyz(limb=limb, xyz=[0.89, 0.0, -0.185], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
 
     # gd = GetData()
     # gd.start_recording()

@@ -119,7 +119,7 @@ def main():
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[10.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[20.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,

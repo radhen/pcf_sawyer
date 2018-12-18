@@ -43,7 +43,7 @@ def main():
                                      description=main.__doc__)
     parser.add_argument(
         "-q", "--joint_angles", type=float,
-        nargs='+', default=[0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125],
+        nargs='+', default=[-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
         "-s",  "--speed_ratio", type=float, default=0.1,
@@ -77,37 +77,37 @@ def main():
         waypoint.set_joint_angles(joint_angles = args.joint_angles)
         traj.append_waypoint(waypoint.to_msg())
 
-        # slight right (20 degree)
-        waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.788298828125])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # neutral position
-        waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # slight left (20 degree)
-        waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.0902988281250003])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # neutral position
-        waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # slight front (20 degree)
-        waypoint.set_joint_angles([0.1974599609375, -0.27071484375, -0.7559970703125, 1.5779091796875, -0.14858203125, -1.1271669921875, 2.5262158203125])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # neutral position
-        waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # slight back (20 degree)
-        waypoint.set_joint_angles([0.1611396484375, -0.174541015625, -0.6814091796875, 1.6546083984375, 0.1373291015625, -1.5653515625, 2.39933984375])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # neutral position
-        waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
+        # # slight right (20 degree)
+        # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.788298828125])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # neutral position
+        # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # slight left (20 degree)
+        # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.0902988281250003])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # neutral position
+        # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # slight front (20 degree)
+        # waypoint.set_joint_angles([0.1974599609375, -0.27071484375, -0.7559970703125, 1.5779091796875, -0.14858203125, -1.1271669921875, 2.5262158203125])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # neutral position
+        # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # slight back (20 degree)
+        # waypoint.set_joint_angles([0.1611396484375, -0.174541015625, -0.6814091796875, 1.6546083984375, 0.1373291015625, -1.5653515625, 2.39933984375])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # neutral position
+        # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125])
+        # traj.append_waypoint(waypoint.to_msg())
 
 
         result = traj.send_trajectory(timeout=args.timeout)

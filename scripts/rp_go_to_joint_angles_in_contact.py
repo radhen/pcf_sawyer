@@ -27,6 +27,8 @@ from intera_motion_msgs.msg import TrajectoryOptions
 from intera_interface import Limb
 from intera_motion_interface.utility_functions import int2bool
 
+from get_data import GetData
+
 def main():
     """
     Move the robot arm to the specified configuration
@@ -86,13 +88,13 @@ def main():
                                      description=main.__doc__)
     parser.add_argument(
         "-q", "--joint_angles", type=float,
-        nargs='+', default=[0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.439298828125],
+        nargs='+', default=[-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
-        "-s",  "--speed_ratio", type=float, default=0.1,
+        "-s",  "--speed_ratio", type=float, default=0.05,
         help="A value between 0.001 (slow) and 1.0 (maximum joint velocity)")
     parser.add_argument(
-        "-a",  "--accel_ratio", type=float, default=0.1,
+        "-a",  "--accel_ratio", type=float, default=0.05,
         help="A value between 0.001 (slow) and 1.0 (maximum joint accel)")
     parser.add_argument(
         "-t", "--trajType", type=str, default='JOINT',
@@ -115,13 +117,13 @@ def main():
         help="A list of desired interaction control mode (1: impedance, 2: force, 3: impedance with force limit, 4: force with motion limit), one for each of the 6 directions")
     parser.add_argument(
         "-fr", "--interaction_frame", type=float,
-        nargs='+', default=[0.0, 0.0, 0.0, 1, 0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
         help="Specify the reference frame for the interaction controller -- first 3 values are positions [m] and last 4 values are orientation in quaternion (w, x, y, z)")
     parser.add_argument(
         "-ef",  "--in_endpoint_frame", action='store_true', default=True,
         help="Set the desired reference frame to endpoint frame; otherwise, it is base frame by default")
     parser.add_argument(
-        "-en",  "--endpoint_name", type=str, default='right_hand',
+        "-en",  "--endpoint_name", type=str, default='right_gripper',
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
@@ -166,53 +168,39 @@ def main():
         waypoint.set_joint_angles(joint_angles = args.joint_angles)
         traj.append_waypoint(waypoint.to_msg())
 
-        # slight right (20 degree)
-        waypoint.set_joint_angles(
-            [0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875,
-             2.788298828125])
-        traj.append_waypoint(waypoint.to_msg())
+        for _ in range(10):
 
-        # neutral position
-        waypoint.set_joint_angles(
-            [0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875,
-             2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
+            # slight right (20 degree)
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.39002498438])
+            traj.append_waypoint(waypoint.to_msg())
 
-        # slight left (20 degree)
-        waypoint.set_joint_angles(
-            [0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875,
-             2.0902988281250003])
-        traj.append_waypoint(waypoint.to_msg())
+            # neutral position
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
+            traj.append_waypoint(waypoint.to_msg())
 
-        # neutral position
-        waypoint.set_joint_angles(
-            [0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875,
-             2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
+            # slight left (20 degree)
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 1.69189298437])
+            traj.append_waypoint(waypoint.to_msg())
 
-        # slight front (20 degree)
-        waypoint.set_joint_angles(
-            [0.1974599609375, -0.27071484375, -0.7559970703125, 1.5779091796875, -0.14858203125, -1.1271669921875,
-             2.5262158203125])
-        traj.append_waypoint(waypoint.to_msg())
+            # neutral position
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
+            traj.append_waypoint(waypoint.to_msg())
 
-        # neutral position
-        waypoint.set_joint_angles(
-            [0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875,
-             2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
+            # slight front (20 degree)
+            waypoint.set_joint_angles([-0.064873046875, 0.503169921875, -0.86875390625, 0.5162587890625, 0.304771484375, -0.8146318359375, 2.35136328125])
+            traj.append_waypoint(waypoint.to_msg())
 
-        # slight back (20 degree)
-        waypoint.set_joint_angles(
-            [0.1611396484375, -0.174541015625, -0.6814091796875, 1.6546083984375, 0.1373291015625, -1.5653515625,
-             2.39933984375])
-        traj.append_waypoint(waypoint.to_msg())
+            # neutral position
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
+            traj.append_waypoint(waypoint.to_msg())
 
-        # neutral position
-        waypoint.set_joint_angles(
-            [0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875,
-             2.439298828125])
-        traj.append_waypoint(waypoint.to_msg())
+            # slight back (20 degree)
+            waypoint.set_joint_angles([-0.13995703125, 0.6450107421875, -0.8112197265625, 0.374861328125, 0.4974287109375, -1.1602705078125, 2.127177734375])
+            traj.append_waypoint(waypoint.to_msg())
+
+            # neutral position
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
+            traj.append_waypoint(waypoint.to_msg())
 
         # set the interaction control options in the current configuration
         interaction_options = InteractionOptions()
@@ -255,6 +243,9 @@ def main():
         trajectory_options.interaction_params = interaction_options.to_msg()
         traj.set_trajectory_options(trajectory_options)
 
+        gd = GetData()
+        gd.start_recording()
+
         result = traj.send_trajectory(timeout=args.timeout)
         if result is None:
             rospy.logerr('Trajectory FAILED to send!')
@@ -268,6 +259,9 @@ def main():
 
         # print the resultant interaction options
         rospy.loginfo('Interaction Options:\n%s', interaction_options.to_msg())
+
+        gd.stop_recording()
+        gd.convertandsave(20)
 
     except rospy.ROSInterruptException:
         rospy.logerr('Keyboard interrupt detected from the user. %s',
