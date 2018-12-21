@@ -105,7 +105,7 @@ def main():
         help="Activate (1) or Deactivate (0) interaction controller")
     parser.add_argument(
         "-k", "--K_impedance", type=float,
-        nargs='+', default=[500.0, 1300.0, 1300.0, 30.0, 30.0, 30.0],
+        nargs='+', default=[100.0, 100.0, 100.0, 10.0, 10.0, 10.0],
         help="A list of desired stiffnesses, one for each of the 6 directions -- stiffness units are (N/m) for first 3 and (Nm/rad) for second 3 values")
     parser.add_argument(
         "-m", "--max_impedance", type=int,
@@ -168,7 +168,7 @@ def main():
         waypoint.set_joint_angles(joint_angles = args.joint_angles)
         traj.append_waypoint(waypoint.to_msg())
 
-        for _ in range(10):
+        for _ in range(3):
 
             # slight right (20 degree)
             waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.39002498438])
@@ -261,7 +261,7 @@ def main():
         rospy.loginfo('Interaction Options:\n%s', interaction_options.to_msg())
 
         gd.stop_recording()
-        gd.convertandsave(20)
+        gd.convertandsave('sync_test_2')
 
     except rospy.ROSInterruptException:
         rospy.logerr('Keyboard interrupt detected from the user. %s',

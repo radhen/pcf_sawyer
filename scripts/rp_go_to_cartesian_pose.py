@@ -127,6 +127,7 @@ def main():
                 return None
             pose = endpoint_state.pose
 
+
             if args.relative_pose is not None:
                 if len(args.relative_pose) != 6:
                     rospy.logerr('Relative pose needs to have 6 elements (x,y,z,roll,pitch,yaw)')
@@ -148,15 +149,18 @@ def main():
                   pose = posemath.toMsg(f2 * posemath.fromMsg(pose))
             else:
                 if args.position is not None and len(args.position) == 3:
-                    pose.position.x = args.position[0]
+                    # NOTE: Hack to cartesian plan in "right_gripper" frame (PCF sensor tip) that I created
+                    pose.position.x = args.position[0] - 0.048
                     pose.position.y = args.position[1]
-                    pose.position.z = args.position[2]
+                    pose.position.z = args.position[2] + 0.03
                 if args.orientation is not None and len(args.orientation) == 4:
                     pose.orientation.x = args.orientation[0]
                     pose.orientation.y = args.orientation[1]
                     pose.orientation.z = args.orientation[2]
                     pose.orientation.w = args.orientation[3]
             poseStamped = PoseStamped()
+            # pose.position.x = pose.position.x + 0.048
+            # pose.position.z = pose.position.z - 0.03
             poseStamped.pose = pose
 
             if not args.joint_angles:
