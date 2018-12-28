@@ -7,7 +7,7 @@ from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimensio
 
 
 def collect_data(port='/dev/ttyACM0'):
-    with serial.Serial(port, 2000000, timeout=0.1) as ser:
+    with serial.Serial(port, 9600, timeout=0.1) as ser:
         ser.flushInput()
         # Give it some time to initialize
         data = []
@@ -18,7 +18,7 @@ def collect_data(port='/dev/ttyACM0'):
             rospy.sleep(1)
         print('\n'.join(filter(None, data)))
         buffer = []
-        r = rospy.Rate(200)
+        r = rospy.Rate(300)
         while not rospy.is_shutdown():
             buffer.append(ser.read(ser.inWaiting()))
             foo = ''.join(buffer).splitlines()
@@ -44,9 +44,9 @@ def collect_data(port='/dev/ttyACM0'):
 def sensor_node():
     c = collect_data()
     #c = collect_data(port='/dev/ttyACM1')
-    pub = rospy.Publisher('/sensor_values', Float32MultiArray, queue_size=1)
-    rospy.init_node('sensor_node')
-    rate = rospy.Rate(100)
+    pub = rospy.Publisher('/sensor_values', Float32MultiArray, queue_size=10)
+    # rospy.init_node('sensor_node')
+    rate = rospy.Rate(500)
     while not rospy.is_shutdown():
         values = next(c)
         msg = Float32MultiArray(
