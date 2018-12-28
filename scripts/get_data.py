@@ -34,7 +34,7 @@ class GetData(object):
 
 
     def got_data(self, float32MultiArray, endpointState):
-        print float32MultiArray.data[0]
+        # print float32MultiArray.data[0]
         # print endpointState.pose.position.x
 
         ################## TIME ######################

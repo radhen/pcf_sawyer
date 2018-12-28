@@ -1,19 +1,5 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2016-2018, Rethink Robotics Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import rospy
 import argparse
 from geometry_msgs.msg import Pose
@@ -30,58 +16,6 @@ from intera_motion_interface.utility_functions import int2bool
 from get_data import GetData
 
 def main():
-    """
-    Move the robot arm to the specified configuration
-    with the desired interaction control options.
-    Call using:
-    $ rosrun intera_examples go_to_joint_angles_in_contact.py  [arguments: see below]
-
-    -q 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-    --> Go to joint pose: 0.0 0.0 0.0 0.0 0.0 0.0 0.0 using default settings
-
-    -q 0.1 -0.2 0.15 -0.05 -0.08 0.14 -0.04 -s 0.1
-    --> Go to pose [...] with a speed ratio of 0.1
-
-    -q -0.2 0.1 0.1 0.2 -0.3 0.2 0.4 -s 0.9 -a 0.1
-    --> Go to pose [...] witha speed ratio of 0.9 and an accel ratio of 0.1
-
-    --trajType CARTESIAN
-    --> Use a Cartesian interpolated endpoint path to reach the goal
-
-    === Interaction Mode options ===
-
-    -st 1
-    --> Set the interaction controller state (1 for True, 0 for False) in the current configuration
-
-    -k 500.0 500.0 500.0 10.0 10.0 10.0
-    --> Set K_impedance to [500.0 500.0 500.0 10.0 10.0 10.0] in the current configuration
-
-    -m 0
-    --> Set max_impedance to False for all 6 directions in the current configuration
-
-    -m 1 1 0 1 1 1
-    --> Set max_impedance to [True True False True True True] in the current configuration
-
-    -kn 5.0 3.0 5.0 4.0 6.0 4.0 6.0
-    --> Set K_nullspace to [5.0 3.0 5.0 4.0 6.0 4.0 6.0] in the current configuration
-
-    -f 0.0 0.0 30.0 0.0 0.0 0.0
-    --> Set force_command to [0.0 0.0 30.0 0.0 0.0 0.0] in the current configuration
-
-    -ef
-    --> Set in_endpoint_frame to True in the current configuration
-
-    -en 'right_hand'
-    --> Specify the desired endpoint frame where impedance and force control behaviors are defined
-
-    -md 1
-    --> Set interaction_control_mode to impedance mode for all 6 directions in the current configuration
-        (1: impedance, 2: force, 3: impedance with force limit, 4: force with motion limit)
-
-    -md 1 1 2 1 1 1
-    --> Set interaction_control_mode to [impedance, impedance, force, impedance, impedance, impedance] in the current configuration
-        (1: impedance, 2: force, 3: impedance with force limit, 4: force with motion limit)
-    """
 
     arg_fmt = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(formatter_class=arg_fmt,
@@ -127,7 +61,7 @@ def main():
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[20.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[15.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
@@ -168,7 +102,18 @@ def main():
         waypoint.set_joint_angles(joint_angles = args.joint_angles)
         traj.append_waypoint(waypoint.to_msg())
 
-        for _ in range(3):
+        result = traj.send_trajectory(timeout=args.timeout)
+        if result is None:
+            rospy.logerr('Trajectory FAILED to send!')
+            return
+
+        if result.result:
+            rospy.loginfo('Motion controller successfully finished the trajectory with interaction options set!')
+        else:
+            rospy.logerr('Motion controller failed to complete the trajectory with error %s',
+                         result.errorId)
+
+        for _ in range(2):
 
             # slight right (20 degree)
             waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.39002498438])
@@ -243,8 +188,8 @@ def main():
         trajectory_options.interaction_params = interaction_options.to_msg()
         traj.set_trajectory_options(trajectory_options)
 
-        gd = GetData()
-        gd.start_recording()
+        # gd = GetData()
+        # gd.start_recording()
 
         result = traj.send_trajectory(timeout=args.timeout)
         if result is None:
@@ -260,8 +205,8 @@ def main():
         # print the resultant interaction options
         rospy.loginfo('Interaction Options:\n%s', interaction_options.to_msg())
 
-        gd.stop_recording()
-        gd.convertandsave('sync_test_2')
+        # gd.stop_recording()
+        # gd.convertandsave('sync_test_2')
 
     except rospy.ROSInterruptException:
         rospy.logerr('Keyboard interrupt detected from the user. %s',
