@@ -55,34 +55,76 @@ class Orientations:
         x = 0.5,
         y = -0.5,
         z = 0.5,
-        w = 0.5
+        w = 0.5,
     )
 
-    SLIGHT_RIGHT = Quaternion(
+    SLIGHT_RIGHT_20 = Quaternion(
         x=0.062,
         y=0.704,
         z=0.062,
-        w=0.704
+        w=0.704,
     )
 
-    SLIGHT_LEFT = Quaternion(
+    SLIGHT_LEFT_20 = Quaternion(
         x=-0.062,
         y=0.704,
         z=-0.062,
-        w=0.704
+        w=0.704,
     )
 
-    SLIGHT_FRONT = Quaternion(
+    SLIGHT_FRONT_20 = Quaternion(
         x=0.0,
         y=0.766,
         z=0.0,
-        w=0.643
+        w=0.643,
     )
 
-    SLIGHT_BACK = Quaternion(
+    SLIGHT_BACK_20 = Quaternion(
         x=0.0,
         y=0.643,
         z=0.0,
-        w=0.766
+        w=0.766,
+    )
+
+    SLIGHT_RIGHT_60 = Quaternion(
+        x=0.0,
+        y=0.0,
+        z=0.5,
+        w=0.866,
+    )
+
+    SLIGHT_LEFT_60 = Quaternion(
+        x=-0.0,
+        y=0.0,
+        z=--0.5,
+        w=0.866,
+    )
+
+    SLIGHT_BACK_60 = Quaternion(
+        x=0.0,
+        y=0.5,
+        z=0.0,
+        w=0.866,
+    )
+
+    SLIGHT_FRONT_60 = Quaternion(
+        x=0.0,
+        y=-0.5,
+        z=0.0,
+        w=0.866,
+    )
+
+    SLIGHT_BACK_30 = Quaternion(
+        x=0.0,
+        y=0.259,
+        z=0.0,
+        w=0.966,
+    )
+
+    SLIGHT_FRONT_30 = Quaternion(
+        x=0.0,
+        y=-0.259,
+        z=0.0,
+        w=0.966,
     )
 

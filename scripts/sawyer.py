@@ -56,7 +56,7 @@ def init_robot(limb_name):
                         "Exiting."), "ERROR")
         return
     limb = intera_interface.Limb(limb_name)
-    limb.set_joint_position_speed(0.05)
+    limb.set_joint_position_speed(0.1)
     # Move to a safe position
     # goto_rest_pos(limb=limb)
 
@@ -127,7 +127,9 @@ def main():
     limb_name = "right"
     limb = init_robot(limb_name=limb_name)
 
-    goto_EE_xyz(limb=limb, xyz=[0.89, 0.0, -0.185], orientation=Orientations.SLIGHT_BACK, rest_pos=True)
+    goto_EE_xyz(limb=limb, xyz=[0.89208, 0.0, -0.19], orientation=Orientations.SLIGHT_FRONT_20, rest_pos=True)
+    # [0.89208, 0.0, -0.19]
+
 
     # gd = GetData()
     # gd.start_recording()

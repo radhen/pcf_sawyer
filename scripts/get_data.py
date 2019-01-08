@@ -13,12 +13,14 @@ import matplotlib.pyplot as plt
 
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
 
 class GetData(object):
     def __init__(self):
         self.pcf_data = np.zeros((1,4))
         self.endeff_data = np.zeros((1,15))
-        self.data = np.zeros((1,17))
+        self.data = np.zeros((1,16))
 
 
     def start_recording(self):
@@ -48,6 +50,12 @@ class GetData(object):
         oy = endpointState.pose.orientation.y
         oz = endpointState.pose.orientation.z
         ow = endpointState.pose.orientation.w
+
+        # save euler angles instead of quaternions
+        # helpful link: http://www.theconstructsim.com/ros-qa-how-to-convert-quaternions-to-euler-angles/
+        orientation_list = [ox, oy, oz, ow]
+        (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
+
         ################## ForceTorque ###############
         fx = endpointState.wrench.force.x
         fy = endpointState.wrench.force.y
@@ -59,7 +67,7 @@ class GetData(object):
         baro = float32MultiArray.data[0]
         ir = float32MultiArray.data[1]
 
-        self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, ox, oy, oz, ow, fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
+        self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, roll, pitch, yaw, fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
 
 
     def pcf_callback(self, data):
@@ -108,7 +116,7 @@ class GetData(object):
         # np.savetxt(path+'/pcf_data_{}.txt'.format(i), self.pcf_data)
         # np.savetxt(path+'/endeff_data_{}.txt'.format(i), self.endeff_data)
 
-        np.savetxt(path + '/data_{}.txt'.format(i), self.data)
+        np.savetxt(path + '/{}.txt'.format(i), self.data)
 
 
 

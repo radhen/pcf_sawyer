@@ -57,7 +57,7 @@ def main():
         nargs='+',
         help="Desired end position: X, Y, Z")
     parser.add_argument(
-        "-o", "--orientation", type=float,
+        "-o", "--orientation", type=float, default=[0.0, 0.707, 0.0, 0.707],
         nargs='+',
         help="Orientation as a quaternion (x, y, z, w)")
     parser.add_argument(
@@ -104,7 +104,7 @@ def main():
                                          max_rotational_speed=args.rotational_speed,
                                          max_rotational_accel=args.rotational_accel,
                                          max_joint_speed_ratio=1.0)
-        waypoint = MotionWaypoint(options = wpt_opts.to_msg(), limb = limb)
+        waypoint = MotionWaypoint(options = wpt_opts.to_msg(), limb = limb, active_endpoint='right_gripper')
 
         joint_names = limb.joint_names()
 
@@ -150,25 +150,25 @@ def main():
             else:
                 if args.position is not None and len(args.position) == 3:
                     # NOTE: Hack to cartesian plan in "right_gripper" frame (PCF sensor tip) that I created
-                    pose.position.x = args.position[0] - 0.048
+                    pose.position.x = args.position[0]
                     pose.position.y = args.position[1]
-                    pose.position.z = args.position[2] + 0.03
+                    pose.position.z = args.position[2]
                 if args.orientation is not None and len(args.orientation) == 4:
                     pose.orientation.x = args.orientation[0]
                     pose.orientation.y = args.orientation[1]
                     pose.orientation.z = args.orientation[2]
                     pose.orientation.w = args.orientation[3]
             poseStamped = PoseStamped()
-            # pose.position.x = pose.position.x + 0.048
-            # pose.position.z = pose.position.z - 0.03
+            pose.position.x = pose.position.x
+            pose.position.z = pose.position.z
             poseStamped.pose = pose
 
             if not args.joint_angles:
                 # using current joint angles for nullspace bais if not provided
                 joint_angles = limb.joint_ordered_angles()
-                waypoint.set_cartesian_pose(poseStamped, args.tip_name, joint_angles)
+                waypoint.set_cartesian_pose(poseStamped, 'right_gripper', joint_angles)
             else:
-                waypoint.set_cartesian_pose(poseStamped, args.tip_name, args.joint_angles)
+                waypoint.set_cartesian_pose(poseStamped, 'right_gripper', args.joint_angles)
 
 
 

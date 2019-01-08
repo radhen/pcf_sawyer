@@ -39,29 +39,29 @@ def main():
         help="Activate (1) or Deactivate (0) interaction controller")
     parser.add_argument(
         "-k", "--K_impedance", type=float,
-        nargs='+', default=[100.0, 100.0, 100.0, 10.0, 10.0, 10.0],
+        nargs='+', default=[1000.0, 1000.0, 1000.0, 15.0, 15.0, 15.0],
         help="A list of desired stiffnesses, one for each of the 6 directions -- stiffness units are (N/m) for first 3 and (Nm/rad) for second 3 values")
     parser.add_argument(
         "-m", "--max_impedance", type=int,
-        nargs='+', default=[0, 1, 1, 1, 1, 1], choices = [0, 1],
+        nargs='+', default=[0, 0, 1, 0, 0, 0], choices = [0, 1],
         help="A list of impedance modulation state, one for each of the 6 directions (a single value can be provided to apply the same value to all the directions) -- 0 for False, 1 for True")
     parser.add_argument(
         "-md", "--interaction_control_mode", type=int,
-        nargs='+', default=[2, 1, 1, 1, 1, 1], choices = [1,2,3,4],
+        nargs='+', default=[1, 1, 2, 1, 1, 1], choices = [1,2,3,4],
         help="A list of desired interaction control mode (1: impedance, 2: force, 3: impedance with force limit, 4: force with motion limit), one for each of the 6 directions")
     parser.add_argument(
         "-fr", "--interaction_frame", type=float,
         nargs='+', default=[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
         help="Specify the reference frame for the interaction controller -- first 3 values are positions [m] and last 4 values are orientation in quaternion (w, x, y, z)")
     parser.add_argument(
-        "-ef",  "--in_endpoint_frame", action='store_true', default=True,
+        "-ef",  "--in_endpoint_frame", action='store_true', default=False,
         help="Set the desired reference frame to endpoint frame; otherwise, it is base frame by default")
     parser.add_argument(
-        "-en",  "--endpoint_name", type=str, default='right_gripper',
+        "-en",  "--endpoint_name", type=str, default='right_hand',
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[15.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, -35.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
@@ -113,11 +113,30 @@ def main():
             rospy.logerr('Motion controller failed to complete the trajectory with error %s',
                          result.errorId)
 
-        for _ in range(2):
+        for _ in range(5):
+
+            # neutral position
+            # waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
+            # traj.append_waypoint(waypoint.to_msg())
+
 
             # slight right (20 degree)
             waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.39002498438])
             traj.append_waypoint(waypoint.to_msg())
+
+
+            # slight right (60 degree) for motion1_left motion1_right
+            # waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 1.040958984375])
+            # traj.append_waypoint(waypoint.to_msg())
+
+            # # slight front (some angle) for motion1_front
+            # waypoint.set_joint_angles([-0.134625, 0.4071240234375, -0.4028115234375, 0.4553232421875, -0.028291015625, -0.7364560546875, 2.136435546875])
+            # traj.append_waypoint(waypoint.to_msg())
+
+            # # slight back (some angle) for motion1_back
+            # waypoint.set_joint_angles([-0.2005771484375, 0.6129736328125, -0.333267578125, 0.1928505859375, 0.055990234375, -1.01959375, 1.9804453125])
+            # traj.append_waypoint(waypoint.to_msg())
+
 
             # neutral position
             waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
@@ -188,8 +207,8 @@ def main():
         trajectory_options.interaction_params = interaction_options.to_msg()
         traj.set_trajectory_options(trajectory_options)
 
-        # gd = GetData()
-        # gd.start_recording()
+        gd = GetData()
+        gd.start_recording()
 
         result = traj.send_trajectory(timeout=args.timeout)
         if result is None:
@@ -205,8 +224,8 @@ def main():
         # print the resultant interaction options
         rospy.loginfo('Interaction Options:\n%s', interaction_options.to_msg())
 
-        # gd.stop_recording()
-        # gd.convertandsave('sync_test_2')
+        gd.stop_recording()
+        gd.convertandsave('motion1_all_35N')
 
     except rospy.ROSInterruptException:
         rospy.logerr('Keyboard interrupt detected from the user. %s',
