@@ -25,6 +25,7 @@ K.set_session(sess)
 np.set_printoptions(threshold=np.nan)
 
 
+
 def plot_history(history):
     plt.figure()
     plt.xlabel('Epoch')

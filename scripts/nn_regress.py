@@ -9,6 +9,7 @@ from sklearn import preprocessing
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from keras.layers import Dense, Activation, Conv1D, MaxPooling1D, Flatten, Dropout, BatchNormalization
 
 # Set random seed
 np.random.seed(0)
@@ -21,11 +22,13 @@ np.random.seed(0)
 #                                    noise = 0.0,
 #                                    random_state = 0)
 
-df_15 = pd.read_excel('/home/radhen/Documents/expData/motion1/all/motion1_all.xlsx',sheet_name='Sheet1',header=None)
-df_20 = pd.read_excel('/home/radhen/Documents/expData/motion1/all/motion1_all.xlsx',sheet_name='Sheet2',header=None)
-df_25 = pd.read_excel('/home/radhen/Documents/expData/motion1/all/motion1_all.xlsx',sheet_name='Sheet3',header=None)
-df_30 = pd.read_excel('/home/radhen/Documents/expData/motion1/all/motion1_all.xlsx',sheet_name='Sheet4',header=None)
-df_35 = pd.read_excel('/home/radhen/Documents/expData/motion1/all/motion1_all.xlsx',sheet_name='Sheet5',header=None)
+# TODO Clean all excel file reading part
+filename = '/home/radhen/Documents/expData/motion1/all/motion1_all.xlsx'
+df_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
+df_20 = pd.read_excel(filename,sheet_name='Sheet2',header=None)
+df_25 = pd.read_excel(filename,sheet_name='Sheet3',header=None)
+df_30 = pd.read_excel(filename,sheet_name='Sheet4',header=None)
+df_35 = pd.read_excel(filename,sheet_name='Sheet5',header=None)
 
 all_15 = df_15.as_matrix()
 all_15 = all_15[950:,:]
@@ -57,38 +60,67 @@ features = all[:,13:15] # [baro, ir]
 # plt.plot(target[:,0], 'b', ms=1.5, label='Measurement')
 # plt.show()
 
-# Divide our data into training and test sets
+# ADD NORMALIZING CODE
+
+# Divide our data into training and test sets. TODO:
 train_features, test_features, train_target, test_target = train_test_split(features,
                                                                             target,
                                                                             test_size=0.33,
                                                                             random_state=0)
 
+# re-shaping after train test split
+WS = 50
+# no_of_examples = train_features.shape[0]/WINDOW_SIZE
+train_x = np.zeros((train_features.shape[0], WS, 2))
+# train_y = np.zeros((no_of_examples, WINDOW_SIZE, 3))
+
+for i in range(train_features.shape[0]-WS-1):
+    # print (i)
+    train_x[i, :, :] = train_features[i:WS+i,:] #this is where the window is actually moving
+    # train_y[i, :, :] = train_target[WINDOW_SIZE*i:WINDOW_SIZE*(i + 1),:]
+
+# no_of_examples = test_features.shape[0]/WINDOW_SIZE
+# test_x = np.zeros((no_of_examples, WINDOW_SIZE, 2))
+# test_y = np.zeros((no_of_examples, WINDOW_SIZE, 3))
+# for i in range(no_of_examples):
+#     test_x[i, :, :] = test_features[WINDOW_SIZE*i:WINDOW_SIZE*(i+1),:]
+#     test_y[i, :, :] = test_target[WINDOW_SIZE*i:WINDOW_SIZE*(i+1), :]
+
+test_x = np.zeros((test_features.shape[0], WS, 2))
+for i in range(test_features.shape[0]-WS-1):
+    test_x[i, :, :] = test_features[i:WS + i, :]
+
+
 # Start neural network
 network = models.Sequential()
 
-# Add fully connected layer with a ReLU activation function
-network.add(layers.Dense(units=32, activation='relu', input_shape=(train_features.shape[1],)))
+network.add(Conv1D(filters=2, kernel_size=10, input_shape=(50, 2)))
 
-# Add fully connected layer with a ReLU activation function
+# network.add(MaxPooling1D(5))
+
+network.add(Conv1D(filters=2, kernel_size=10))
+
+network.add(Flatten())
+
 network.add(layers.Dense(units=32, activation='relu'))
 
-# Add fully connected layer with no activation function
+network.add(layers.Dense(units=32, activation='relu'))
+
 network.add(layers.Dense(units=3))
 
-# Compile neural network
 network.compile(loss='mse', # Mean squared error
                 optimizer='RMSprop', # Optimization algorithm
                 metrics=['mse']) # Mean squared error
 
 # Train neural network
-history = network.fit(train_features, # Features
+history = network.fit(train_x, # Features
                       train_target, # Target vector
-                      epochs=10, # Number of epochs
+                      epochs=100, # Number of epochs
                       verbose=0, # No output
-                      batch_size=100, # Number of observations per batch
-                      validation_data=(test_features, test_target)) # Data for evaluation
+                      batch_size=20, # Number of observations per batch
+                      validation_data=(test_x, test_target)) # Data for evaluation
 
 
-loss_and_metrics = network.evaluate(test_features, test_target, batch_size=128)
+loss_and_metrics = network.evaluate(test_x, test_target, batch_size=10)
 
-print ("Done")
+print (loss_and_metrics)
