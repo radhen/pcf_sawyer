@@ -11,8 +11,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from keras.layers import Dense, Activation, Conv1D, MaxPooling1D, Flatten, Dropout, BatchNormalization
 
+from pandas import Series
+from sklearn.preprocessing import StandardScaler
+import math
+
 # Set random seed
 np.random.seed(0)
+
+
 
 # Generate FAKE features matrix and target vector
 # features, target = make_regression(n_samples = 10000,
@@ -22,7 +28,8 @@ np.random.seed(0)
 #                                    noise = 0.0,
 #                                    random_state = 0)
 
-# TODO Clean all excel file reading part
+
+# TODO Clean all excel file reading stuff
 filename = '/home/radhen/Documents/expData/motion1/all/motion1_all.xlsx'
 df_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
 df_20 = pd.read_excel(filename,sheet_name='Sheet2',header=None)
@@ -48,43 +55,70 @@ all = np.append(all,all_30,axis=0)
 all = np.append(all,all_35,axis=0)
 
 
-
-F = np.sqrt(np.square(all[:,8]) + np.square(all[:,9]) + np.square(all[:,10])) # F = sqrt(Fx^2+Fy^2+Fz^2)
+# Initial definations of targets and features for the problem
+F = np.sqrt(np.square(all[:,8]) + np.square(all[:,9]) + np.square(all[:,10]))  #resultant force F = sqrt(Fx^2+Fy^2+Fz^2)
 theta = all[:,6]
 alpha = all[:,7]
-
-target = np.column_stack((F, theta))
-target = np.column_stack((target, alpha)) # [F, theta, alpha]
+targets = np.column_stack((F, theta))
+targets = np.column_stack((targets, alpha)) # [F, theta, alpha]
 features = all[:,13:15] # [baro, ir]
 
+
+# Plotting stuff
 # plt.plot(target[:,0], 'b', ms=1.5, label='Measurement')
 # plt.show()
 
-# ADD NORMALIZING CODE
 
-# Divide our data into training and test sets. TODO:
-train_features, test_features, train_target, test_target = train_test_split(features,
-                                                                            target,
+# TODO ADD NORMALIZING CODE
+def preprocessData(X):
+
+    '''normalizing data to zero mean and 1 std. dev.
+    '''
+    # for i in range(120):
+    # ----- normalizing between 0 and 1 ----- #
+    # X[i,:,0] = (X[i,:,0] - min(X[i,:,0]))/float(max(X[i,:,0])-min(X[i,:,0]))
+    # X[i,:,1] = (X[i,:,1] - min(X[i,:,1]))/float(max(X[i,:,1])-min(X[i,:,1]))
+
+    # ----- normalizing with 0 mean and 1 std. dev. ----- #
+    for i in range(X.shape[1]):
+        series = Series(X[:,i])
+        # prepare data for normalization
+        values = series.values
+        values = values.reshape((len(values), 1))
+        # train the normalization
+        scaler = StandardScaler()
+        scaler = scaler.fit(values)
+        print('Mean: %f, StandardDeviation: %f' % (scaler.mean_, math.sqrt(scaler.var_)))
+        # normalize the dataset and print
+        standardized = scaler.transform(values)
+        # print (standardized[:,0])
+        X[:,i] = standardized[:,0]
+        # print(standardized.shape)
+        # inverse transform and print
+        # inversed = scaler.inverse_transform(standardized)
+        # print(inversed.shape)
+        # X[i,:,0] = inversed[:]
+        # print (type(inversed))
+
+    # print (X[0,:,0])
+    # print (X[0,:,1])
+    return (X)
+
+features = preprocessData(features)
+targets = preprocessData(targets)
+
+# Divide our data into training and test sets.
+# Splitting this way selects points at random from the dataset. Does it matter? Does sorting the data matter
+train_features, test_features, train_targets, test_targets = train_test_split(features,
+                                                                            targets,
                                                                             test_size=0.33,
                                                                             random_state=0)
 
-# re-shaping after train test split
+# Re-shaping after train test split to create a buffer of window size WS (below)
 WS = 50
-# no_of_examples = train_features.shape[0]/WINDOW_SIZE
 train_x = np.zeros((train_features.shape[0], WS, 2))
-# train_y = np.zeros((no_of_examples, WINDOW_SIZE, 3))
-
 for i in range(train_features.shape[0]-WS-1):
-    # print (i)
     train_x[i, :, :] = train_features[i:WS+i,:] #this is where the window is actually moving
-    # train_y[i, :, :] = train_target[WINDOW_SIZE*i:WINDOW_SIZE*(i + 1),:]
-
-# no_of_examples = test_features.shape[0]/WINDOW_SIZE
-# test_x = np.zeros((no_of_examples, WINDOW_SIZE, 2))
-# test_y = np.zeros((no_of_examples, WINDOW_SIZE, 3))
-# for i in range(no_of_examples):
-#     test_x[i, :, :] = test_features[WINDOW_SIZE*i:WINDOW_SIZE*(i+1),:]
-#     test_y[i, :, :] = test_target[WINDOW_SIZE*i:WINDOW_SIZE*(i+1), :]
 
 test_x = np.zeros((test_features.shape[0], WS, 2))
 for i in range(test_features.shape[0]-WS-1):
@@ -94,33 +128,46 @@ for i in range(test_features.shape[0]-WS-1):
 # Start neural network
 network = models.Sequential()
 
-network.add(Conv1D(filters=2, kernel_size=10, input_shape=(50, 2)))
+network.add(Conv1D(filters=8, kernel_size=4, input_shape=(WS, 2)))
 
 # network.add(MaxPooling1D(5))
 
-network.add(Conv1D(filters=2, kernel_size=10))
+network.add(Conv1D(filters=8, kernel_size=4))
 
 network.add(Flatten())
 
-network.add(layers.Dense(units=32, activation='relu'))
+network.add(layers.Dense(units=64, activation='relu'))
 
 network.add(layers.Dense(units=32, activation='relu'))
+
+network.add(layers.Dense(units=16, activation='relu'))
+
+network.add(layers.Dense(units=8, activation='relu'))
 
 network.add(layers.Dense(units=3))
 
 network.compile(loss='mse', # Mean squared error
                 optimizer='RMSprop', # Optimization algorithm
                 metrics=['mse']) # Mean squared error
+print (network.summary())
 
 # Train neural network
 history = network.fit(train_x, # Features
-                      train_target, # Target vector
+                      train_targets, # Target vector
                       epochs=100, # Number of epochs
                       verbose=0, # No output
                       batch_size=20, # Number of observations per batch
-                      validation_data=(test_x, test_target)) # Data for evaluation
+                      validation_data=(test_x, test_targets)) # Data for evaluation
 
 
-loss_and_metrics = network.evaluate(test_x, test_target, batch_size=10)
-
+loss_and_metrics = network.evaluate(test_x, test_targets, batch_size=10)
 print (loss_and_metrics)
+
+y_predict = network.predict(test_x, batch_size=5, verbose=0, steps=None)
+
+fig = plt.figure()
+plt.plot(np.sort(test_targets[:,0]), 'b', ms=1.5, label='actual')
+plt.plot(np.sort(y_predict[:,0]), 'r', ms=1.5, label='predictions')
+
+print ('Done')
+
