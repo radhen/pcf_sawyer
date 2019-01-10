@@ -3,6 +3,7 @@ import numpy as np
 from keras.preprocessing.text import Tokenizer
 from keras import models
 from keras import layers
+from keras.callbacks import ModelCheckpoint
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
@@ -69,11 +70,10 @@ features = all[:,13:15] # [baro, ir]
 # plt.show()
 
 
-# TODO ADD NORMALIZING CODE
 def preprocessData(X):
-
     '''normalizing data to zero mean and 1 std. dev.
     '''
+
     # for i in range(120):
     # ----- normalizing between 0 and 1 ----- #
     # X[i,:,0] = (X[i,:,0] - min(X[i,:,0]))/float(max(X[i,:,0])-min(X[i,:,0]))
@@ -127,47 +127,48 @@ for i in range(test_features.shape[0]-WS-1):
 
 # Start neural network
 network = models.Sequential()
-
 network.add(Conv1D(filters=8, kernel_size=4, input_shape=(WS, 2)))
-
 # network.add(MaxPooling1D(5))
-
 network.add(Conv1D(filters=8, kernel_size=4))
-
 network.add(Flatten())
-
 network.add(layers.Dense(units=64, activation='relu'))
-
 network.add(layers.Dense(units=32, activation='relu'))
-
 network.add(layers.Dense(units=16, activation='relu'))
-
 network.add(layers.Dense(units=8, activation='relu'))
-
 network.add(layers.Dense(units=3))
+
+network.load_weights("weights.best.hdf5")
 
 network.compile(loss='mse', # Mean squared error
                 optimizer='RMSprop', # Optimization algorithm
                 metrics=['mse']) # Mean squared error
+
 print (network.summary())
 
+# Checkpoint. Useful link: https://machinelearningmastery.com/check-point-deep-learning-models-keras/
+# filepath="weights.best.hdf5"
+# checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+# callbacks_list = [checkpoint]
+
 # Train neural network
-history = network.fit(train_x, # Features
-                      train_targets, # Target vector
-                      epochs=100, # Number of epochs
-                      verbose=0, # No output
-                      batch_size=20, # Number of observations per batch
-                      validation_data=(test_x, test_targets)) # Data for evaluation
+# history = network.fit(train_x, # Features
+#                       train_targets, # Target vector
+#                       epochs=100, # Number of epochs
+#                       verbose=1, # No output
+#                       batch_size=25, # Number of observations per batch
+#                       validation_data=(test_x, test_targets), # Data for evaluation
+#                       callbacks=callbacks_list)
 
 
 loss_and_metrics = network.evaluate(test_x, test_targets, batch_size=10)
 print (loss_and_metrics)
 
-y_predict = network.predict(test_x, batch_size=5, verbose=0, steps=None)
+y_predict = network.predict(test_x, batch_size=10, verbose=0, steps=None)
 
 fig = plt.figure()
 plt.plot(np.sort(test_targets[:,0]), 'b', ms=1.5, label='actual')
 plt.plot(np.sort(y_predict[:,0]), 'r', ms=1.5, label='predictions')
+plt.show()
 
 print ('Done')
 
