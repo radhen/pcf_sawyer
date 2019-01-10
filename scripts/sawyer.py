@@ -127,7 +127,7 @@ def main():
     limb_name = "right"
     limb = init_robot(limb_name=limb_name)
 
-    goto_EE_xyz(limb=limb, xyz=[0.89208, 0.0, -0.19], orientation=Orientations.SLIGHT_FRONT_20, rest_pos=True)
+    goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.3], orientation=Orientations.FORWARD_POINT, rest_pos=True)
     # [0.89208, 0.0, -0.19]
 
 

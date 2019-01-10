@@ -31,7 +31,7 @@ def main():
         "-a",  "--accel_ratio", type=float, default=0.05,
         help="A value between 0.001 (slow) and 1.0 (maximum joint accel)")
     parser.add_argument(
-        "-t", "--trajType", type=str, default='JOINT',
+        "-t", "--trajType", type=str, default='CARTESIAN',
         choices=['JOINT', 'CARTESIAN'],
         help="trajectory interpolation type")
     parser.add_argument(
@@ -115,51 +115,32 @@ def main():
 
         for _ in range(5):
 
-            # neutral position
-            # waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
-            # traj.append_waypoint(waypoint.to_msg())
-
-
-            # slight right (20 degree)
-            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.39002498438])
-            traj.append_waypoint(waypoint.to_msg())
-
-
-            # slight right (60 degree) for motion1_left motion1_right
-            # waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 1.040958984375])
-            # traj.append_waypoint(waypoint.to_msg())
-
-            # # slight front (some angle) for motion1_front
-            # waypoint.set_joint_angles([-0.134625, 0.4071240234375, -0.4028115234375, 0.4553232421875, -0.028291015625, -0.7364560546875, 2.136435546875])
-            # traj.append_waypoint(waypoint.to_msg())
-
-            # # slight back (some angle) for motion1_back
-            # waypoint.set_joint_angles([-0.2005771484375, 0.6129736328125, -0.333267578125, 0.1928505859375, 0.055990234375, -1.01959375, 1.9804453125])
-            # traj.append_waypoint(waypoint.to_msg())
-
-
-            # neutral position
-            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
-            traj.append_waypoint(waypoint.to_msg())
-
-            # slight left (20 degree)
-            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 1.69189298437])
+            # slight right (30 degree)
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.56455798437])
             traj.append_waypoint(waypoint.to_msg())
 
             # neutral position
             waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
             traj.append_waypoint(waypoint.to_msg())
 
-            # slight front (20 degree)
-            waypoint.set_joint_angles([-0.064873046875, 0.503169921875, -0.86875390625, 0.5162587890625, 0.304771484375, -0.8146318359375, 2.35136328125])
+            # slight left (30 degree)
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 1.51735998438])
             traj.append_waypoint(waypoint.to_msg())
 
             # neutral position
             waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
             traj.append_waypoint(waypoint.to_msg())
 
-            # slight back (20 degree)
-            waypoint.set_joint_angles([-0.13995703125, 0.6450107421875, -0.8112197265625, 0.374861328125, 0.4974287109375, -1.1602705078125, 2.127177734375])
+            # slight front (30 degree)
+            waypoint.set_joint_angles([-0.4005859375, 0.1294775390625, 0.4800302734375, 0.6989287109375, -0.591427734375, -0.216119140625, 1.6886953125])
+            traj.append_waypoint(waypoint.to_msg())
+
+            # neutral position
+            waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
+            traj.append_waypoint(waypoint.to_msg())
+
+            # slight back (30 degree)
+            waypoint.set_joint_angles([-0.4233544921875, 0.503890625, 1.1577705078125, 0.1215380859375, -1.500345703125, -1.112474609375, 2.0203779296875])
             traj.append_waypoint(waypoint.to_msg())
 
             # neutral position
@@ -225,7 +206,7 @@ def main():
         rospy.loginfo('Interaction Options:\n%s', interaction_options.to_msg())
 
         gd.stop_recording()
-        gd.convertandsave('motion1_all_35N')
+        gd.convertandsave('motion1_all_30deg_35N')
 
     except rospy.ROSInterruptException:
         rospy.logerr('Keyboard interrupt detected from the user. %s',
