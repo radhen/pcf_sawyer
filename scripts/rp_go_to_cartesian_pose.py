@@ -57,7 +57,7 @@ def main():
         nargs='+',
         help="Desired end position: X, Y, Z")
     parser.add_argument(
-        "-o", "--orientation", type=float, default=[0.0, 0.707, 0.0, 0.707],
+        "-o", "--orientation", type=float,
         nargs='+',
         help="Orientation as a quaternion (x, y, z, w)")
     parser.add_argument(
@@ -75,10 +75,10 @@ def main():
         "-t",  "--tip_name", default='right_hand',
         help="The tip name used by the Cartesian pose")
     parser.add_argument(
-        "--linear_speed", type=float, default=0.6,
+        "--linear_speed", type=float, default=0.1,
         help="The max linear speed of the endpoint (m/s)")
     parser.add_argument(
-        "--linear_accel", type=float, default=0.6,
+        "--linear_accel", type=float, default=0.1,
         help="The max linear acceleration of the endpoint (m/s/s)")
     parser.add_argument(
         "--rotational_speed", type=float, default=1.57,
@@ -104,7 +104,7 @@ def main():
                                          max_rotational_speed=args.rotational_speed,
                                          max_rotational_accel=args.rotational_accel,
                                          max_joint_speed_ratio=1.0)
-        waypoint = MotionWaypoint(options = wpt_opts.to_msg(), limb = limb, active_endpoint='right_gripper')
+        waypoint = MotionWaypoint(options = wpt_opts.to_msg(), limb = limb, active_endpoint='right_hand')
 
         joint_names = limb.joint_names()
 
@@ -166,9 +166,9 @@ def main():
             if not args.joint_angles:
                 # using current joint angles for nullspace bais if not provided
                 joint_angles = limb.joint_ordered_angles()
-                waypoint.set_cartesian_pose(poseStamped, 'right_gripper', joint_angles)
+                waypoint.set_cartesian_pose(poseStamped, 'right_hand', joint_angles)
             else:
-                waypoint.set_cartesian_pose(poseStamped, 'right_gripper', args.joint_angles)
+                waypoint.set_cartesian_pose(poseStamped, 'right_hand', args.joint_angles)
 
 
 

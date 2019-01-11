@@ -27,13 +27,13 @@ def main():
                                      description=main.__doc__)
     parser.add_argument(
         "-q", "--joint_angles", type=float,
-        nargs='+', default=[-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375],
+        nargs='+', default=[-0.04209765625, -0.03077734375, -0.489986328125, 0.788107421875, -0.0457724609375, -0.81256640625, 2.2654931640625],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
-        "-s",  "--speed_ratio", type=float, default=0.1,
+        "-s",  "--speed_ratio", type=float, default=1.0,
         help="A value between 0.001 (slow) and 1.0 (maximum joint velocity)")
     parser.add_argument(
-        "-a",  "--accel_ratio", type=float, default=0.1,
+        "-a",  "--accel_ratio", type=float, default=1.0,
         help="A value between 0.001 (slow) and 1.0 (maximum joint accel)")
     parser.add_argument(
         "--timeout", type=float, default=None,
@@ -61,14 +61,15 @@ def main():
         waypoint.set_joint_angles(joint_angles = args.joint_angles)
         traj.append_waypoint(waypoint.to_msg())
 
-        # slight right (20 degree)
-        waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 3])
-        traj.append_waypoint(waypoint.to_msg())
+        for _ in range(100):
+            # slight right (20 degree)
+            waypoint.set_joint_angles([-0.04209765625, -0.03077734375, -0.489986328125, 0.788107421875, -0.0457724609375, -0.81256640625, 3])
+            traj.append_waypoint(waypoint.to_msg())
 
-        # neutral position
-        waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
-        traj.append_waypoint(waypoint.to_msg())
-        #
+            # neutral position
+            waypoint.set_joint_angles([-0.04209765625, -0.03077734375, -0.489986328125, 0.788107421875, -0.0457724609375, -0.81256640625, 2.2654931640625])
+            traj.append_waypoint(waypoint.to_msg())
+
         # # slight left (20 degree)
         # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.0902988281250003])
         # traj.append_waypoint(waypoint.to_msg())
