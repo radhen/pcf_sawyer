@@ -67,7 +67,7 @@ class GetData(object):
         baro = float32MultiArray.data[0]
         ir = float32MultiArray.data[1]
 
-        self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, roll, pitch, yaw, fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
+        self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, roll, 90 - pitch*(180/3.14), yaw*(180/3.14), fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
 
 
     def pcf_callback(self, data):
@@ -117,9 +117,6 @@ class GetData(object):
         # np.savetxt(path+'/endeff_data_{}.txt'.format(i), self.endeff_data)
 
         np.savetxt(path + '/{}.txt'.format(i), self.data)
-
-
-
 
 
 

@@ -39,7 +39,7 @@ def main():
         help="Activate (1) or Deactivate (0) interaction controller")
     parser.add_argument(
         "-k", "--K_impedance", type=float,
-        nargs='+', default=[1000.0, 1000.0, 1000.0, 15.0, 15.0, 15.0],
+        nargs='+', default=[500.0, 500.0, 500.0, 15.0, 15.0, 15.0],
         help="A list of desired stiffnesses, one for each of the 6 directions -- stiffness units are (N/m) for first 3 and (Nm/rad) for second 3 values")
     parser.add_argument(
         "-m", "--max_impedance", type=int,
@@ -61,7 +61,7 @@ def main():
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[0.0, 0.0, -35.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, -20.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
@@ -206,7 +206,7 @@ def main():
         rospy.loginfo('Interaction Options:\n%s', interaction_options.to_msg())
 
         gd.stop_recording()
-        gd.convertandsave('motion1_all_30deg_35N')
+        gd.convertandsave('angle_test')
 
     except rospy.ROSInterruptException:
         rospy.logerr('Keyboard interrupt detected from the user. %s',
