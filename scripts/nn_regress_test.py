@@ -36,54 +36,59 @@ class RealTimeTesting(object):
         self.ws = 50
         self.arr = np.empty((1,2))
 
-        # load json and create model
-        # https://machinelearningmastery.com/save-load-keras-deep-learning-models/
-        json_file = open('model.json', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        self.loaded_model = model_from_json(loaded_model_json)
-        # load weights into new model
-        self.loaded_model.load_weights("weights.best.hdf5")
-        print("Loaded model from disk")
-        # evaluate loaded model on test data
-        self.loaded_model.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])
 
-        pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_sub_func)
+    def pcf_sub_func(self, msg, model):
 
-    def pcf_sub_func(self, msg):
-        # features = np.append(features, [[msg.data[0], msg.data[1]]], axis=0)
         # print (msg.data[0])
+
         self.arr = np.append(self.arr, [[msg.data[0], msg.data[1]]], axis=0)
         if (self.arr.shape[0] >= 50):
             ws_0 = self.arr.shape[0] - self.ws
+
             # print ("(" + str(0 + ws_0) + " , " + str(self.ws + ws_0) + ")")
+
             arr_3d = self.arr[0+ws_0 : self.ws+ws_0].reshape(1,self.ws,2)
+
             # print (arr_3d.shape)
-            y_predict = self.loaded_model.predict(arr_3d, verbose=1, steps=None)
+            # arr = np.random.rand(50,2)
+            # arr_3d = arr.reshape(1,50,2)
+
+            y_predict = model.predict(arr_3d)
             print (y_predict)
-            # return self.arr[0+ws_0 : self.ws+ws_0]
+
+            # return arr_3d
 
 
-
-
+    def listener(self, model):
+        pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_sub_func, model)
+        rospy.spin()
 
 
 
 
 if __name__ == "__main__":
+
     rospy.init_node('real_time_testing')
+
     rlt = RealTimeTesting()
-    # learned_model = rlt.load_model()
-    rospy.spin()
 
+    # load json and create model
+    # https://machinelearningmastery.com/save-load-keras-deep-learning-models/
+    json_file = open('model.json', 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    loaded_model = model_from_json(loaded_model_json)
+    # load weights into new model
+    loaded_model.load_weights("weights.best.hdf5")
+    print("Loaded model from disk")
+    # evaluate loaded model on test data
+    loaded_model.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])
 
+    rlt.listener(loaded_model)
 
+    # arr = np.random.rand(50,2)
+    # arr_3d = arr.reshape(1,50,2)
+    # y = rlt.loaded_model.predict(arr_3d)
+    # print (y)
 
-# score = loaded_model.evaluate(X, Y, verbose=0)
-
-# fig = plt.figure()
-# plt.plot(np.sort(targets[:,0]), 'b', ms=1.5, label='actual')
-# plt.plot(np.sort(y_predict[:,0]), 'r', ms=1.5, label='predictions')
-# plt.show()
-#
-# print ('Done')
+    # rospy.spin()
