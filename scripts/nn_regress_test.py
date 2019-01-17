@@ -7,7 +7,7 @@ import rospy
 from std_msgs.msg import Float32MultiArray
 
 
-rospy.init_node('node_name')
+
 
 # filename = '/home/radhen/Documents/expData/motion1/all/20deg/motion1_all.xlsx'
 # df_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
@@ -29,33 +29,53 @@ rospy.init_node('node_name')
 # for i in range(features.shape[0]-WS-1):
 #     test_x[i, :, :] = features[i:WS+i,:] #this is where the window is actually moving
 
-# load json and create model
-json_file = open('model.json', 'r')
-loaded_model_json = json_file.read()
-json_file.close()
-loaded_model = model_from_json(loaded_model_json)
+class RealTimeTesting(object):
 
-# load weights into new model
-loaded_model.load_weights("weights.best.hdf5")
-print("Loaded model from disk")
+    def __init__(self):
 
-# evaluate loaded model on test data
-loaded_model.compile(loss='mse', # Mean squared error
-                optimizer='RMSprop', # Optimization algorithm
-                metrics=['mse']) # Mean squared error
+        self.ws = 50
+        self.arr = np.empty((1,2))
 
-# y_predict = loaded_model.predict(test_x, batch_size=10, verbose=0, steps=None)
-features = np.empty((1,2))
+        # load json and create model
+        # https://machinelearningmastery.com/save-load-keras-deep-learning-models/
+        json_file = open('model.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        self.loaded_model = model_from_json(loaded_model_json)
+        # load weights into new model
+        self.loaded_model.load_weights("weights.best.hdf5")
+        print("Loaded model from disk")
+        # evaluate loaded model on test data
+        self.loaded_model.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])
+
+        pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_sub_func)
+
+    def pcf_sub_func(self, msg):
+        # features = np.append(features, [[msg.data[0], msg.data[1]]], axis=0)
+        # print (msg.data[0])
+        self.arr = np.append(self.arr, [[msg.data[0], msg.data[1]]], axis=0)
+        if (self.arr.shape[0] >= 50):
+            ws_0 = self.arr.shape[0] - self.ws
+            # print ("(" + str(0 + ws_0) + " , " + str(self.ws + ws_0) + ")")
+            arr_3d = self.arr[0+ws_0 : self.ws+ws_0].reshape(1,self.ws,2)
+            # print (arr_3d.shape)
+            y_predict = self.loaded_model.predict(arr_3d, verbose=1, steps=None)
+            print (y_predict)
+            # return self.arr[0+ws_0 : self.ws+ws_0]
 
 
-def pcf_sub_func(msg):
-    features = np.append(features, [[msg.data[0], msg.data[1]]], axis=0)
-    print (features.shape)
 
 
 
-while (1):
-    pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, pcf_sub_func)
+
+
+
+if __name__ == "__main__":
+    rospy.init_node('real_time_testing')
+    rlt = RealTimeTesting()
+    # learned_model = rlt.load_model()
+    rospy.spin()
+
 
 
 

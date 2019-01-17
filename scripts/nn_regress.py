@@ -165,7 +165,7 @@ history = network.fit(train_x, # Features
 loss_and_metrics = network.evaluate(test_x, test_targets, batch_size=10)
 print (loss_and_metrics)
 
-
+# https://machinelearningmastery.com/save-load-keras-deep-learning-models/
 network_json = network.to_json()
 with open("model.json", "w") as json_file:
     json_file.write(network_json)
