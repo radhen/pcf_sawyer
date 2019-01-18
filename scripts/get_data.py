@@ -6,10 +6,11 @@ import rospy
 from std_msgs.msg import Float32MultiArray
 from intera_core_msgs.msg import EndpointState
 from sensor_msgs.msg import JointState
+from geometry_msgs.msg import PoseStamped
 
 import numpy as np
 # from scipy import signal
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 
@@ -24,32 +25,34 @@ class GetData(object):
 
 
     def start_recording(self):
+
         # self.pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_callback)
         # self.ft_sub = rospy.Subscriber("/robot/limb/right/endpoint_state", EndpointState, self.endeff_callback)
 
         # MESSAGE FILTERS: http://docs.ros.org/api/message_filters/html/python/#message_filters.TimeSynchronizer
         self.pcf_sub = Subscriber("/sensor_values", Float32MultiArray)
         self.ft_sub = Subscriber("/robot/limb/right/endpoint_state", EndpointState)
+        self.pose_sub = Subscriber("/new_right_gripper_frame", PoseStamped)
 
-        ats = ApproximateTimeSynchronizer([self.pcf_sub, self.ft_sub], queue_size=5, slop=0.01, allow_headerless=True)
+        ats = ApproximateTimeSynchronizer([self.pcf_sub, self.ft_sub, self.pose_sub], queue_size=5, slop=0.01, allow_headerless=True)
         ats.registerCallback(self.got_data)
 
 
-    def got_data(self, float32MultiArray, endpointState):
+    def got_data(self, float32MultiArray, endpointState, posestamped):
         # print float32MultiArray.data[0]
         # print endpointState.pose.position.x
 
         ################## TIME ######################
-        sec = endpointState.header.stamp.secs
-        nsec = endpointState.header.stamp.nsecs
+        sec = posestamped.header.stamp.secs
+        nsec = posestamped.header.stamp.nsecs
         ################## POSE ######################
-        px = endpointState.pose.position.x
-        py = endpointState.pose.position.y
-        pz = endpointState.pose.position.z
-        ox = endpointState.pose.orientation.x
-        oy = endpointState.pose.orientation.y
-        oz = endpointState.pose.orientation.z
-        ow = endpointState.pose.orientation.w
+        px = posestamped.pose.position.x
+        py = posestamped.pose.position.y
+        pz = posestamped.pose.position.z
+        ox = posestamped.pose.orientation.x
+        oy = posestamped.pose.orientation.y
+        oz = posestamped.pose.orientation.z
+        ow = posestamped.pose.orientation.w
 
         # save euler angles instead of quaternions
         # helpful link: http://www.theconstructsim.com/ros-qa-how-to-convert-quaternions-to-euler-angles/
@@ -67,7 +70,7 @@ class GetData(object):
         baro = float32MultiArray.data[0]
         ir = float32MultiArray.data[1]
 
-        self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, roll, 90 - pitch*(180/3.14), yaw*(180/3.14), fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
+        self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, roll, pitch, yaw, fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
 
 
     def pcf_callback(self, data):

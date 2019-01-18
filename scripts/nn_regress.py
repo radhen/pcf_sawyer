@@ -8,9 +8,9 @@ from keras.models import model_from_json
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-
+import tensorflow as tf
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from keras.layers import Dense, Activation, Conv1D, MaxPooling1D, Flatten, Dropout, BatchNormalization
 
 from pandas import Series
@@ -155,12 +155,13 @@ callbacks_list = [checkpoint]
 # Train neural network
 history = network.fit(train_x, # Features
                       train_targets, # Target vector
-                      epochs=100, # Number of epochs
+                      epochs=10, # Number of epochs
                       verbose=1, # No output
                       batch_size=25, # Number of observations per batch
                       validation_data=(test_x, test_targets), # Data for evaluation
                       callbacks=callbacks_list)
 
+# tf.keras.backend.clear_session()
 
 loss_and_metrics = network.evaluate(test_x, test_targets, batch_size=10)
 print (loss_and_metrics)
@@ -171,7 +172,7 @@ with open("model.json", "w") as json_file:
     json_file.write(network_json)
 
 
-y_predict = network.predict(test_x, batch_size=10, verbose=0, steps=None)
+#y_predict = network.predict(test_x, batch_size=10, verbose=0, steps=None)
 
 # fig = plt.figure()
 # plt.plot(np.sort(test_targets[:,0]), 'b', ms=1.5, label='actual')

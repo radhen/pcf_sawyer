@@ -1,12 +1,13 @@
 from __future__ import division
+# import os
+# os.environ['KERAS_BACKEND'] = 'theano'
 from keras.models import model_from_json
 # import pandas as pd
 import numpy as np
 # import matplotlib.pyplot as plt
 import rospy
 from std_msgs.msg import Float32MultiArray
-
-
+import tensorflow as tf
 
 
 # filename = '/home/radhen/Documents/expData/motion1/all/20deg/motion1_all.xlsx'
@@ -36,34 +37,26 @@ class RealTimeTesting(object):
         self.ws = 50
         self.arr = np.empty((1,2))
 
-
     def pcf_sub_func(self, msg, model):
-
         # print (msg.data[0])
-
         self.arr = np.append(self.arr, [[msg.data[0], msg.data[1]]], axis=0)
         if (self.arr.shape[0] >= 50):
             ws_0 = self.arr.shape[0] - self.ws
-
             # print ("(" + str(0 + ws_0) + " , " + str(self.ws + ws_0) + ")")
-
             arr_3d = self.arr[0+ws_0 : self.ws+ws_0].reshape(1,self.ws,2)
-
             # print (arr_3d.shape)
             # arr = np.random.rand(50,2)
             # arr_3d = arr.reshape(1,50,2)
-
-            y_predict = model.predict(arr_3d)
+            # global graph
+            with graph.as_default():
+                y_predict = model.predict(arr_3d)
             print (y_predict)
-
             # return arr_3d
 
 
     def listener(self, model):
         pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_sub_func, model)
         rospy.spin()
-
-
 
 
 if __name__ == "__main__":
@@ -84,11 +77,15 @@ if __name__ == "__main__":
     # evaluate loaded model on test data
     loaded_model.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])
 
+    # keras issue: solution https://github.com/matsui528/sis/issues/1
+    global graph
+    graph = tf.get_default_graph()
+
     rlt.listener(loaded_model)
 
     # arr = np.random.rand(50,2)
     # arr_3d = arr.reshape(1,50,2)
-    # y = rlt.loaded_model.predict(arr_3d)
+    # y = loaded_model.predict(arr_3d)
     # print (y)
 
     # rospy.spin()

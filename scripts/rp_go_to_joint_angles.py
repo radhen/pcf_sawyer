@@ -27,7 +27,7 @@ def main():
                                      description=main.__doc__)
     parser.add_argument(
         "-q", "--joint_angles", type=float,
-        nargs='+', default=[-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375],
+        nargs='+', default=[-0.4005859375, 0.1294775390625, 0.4800302734375, 0.6989287109375, -0.591427734375, -0.216119140625, 1.6886953125],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
         "-s",  "--speed_ratio", type=float, default=0.1,
@@ -62,12 +62,12 @@ def main():
         traj.append_waypoint(waypoint.to_msg())
 
         # slight right (20 degree)
-        waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 3])
-        traj.append_waypoint(waypoint.to_msg())
-
-        # neutral position
-        waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
-        traj.append_waypoint(waypoint.to_msg())
+        # waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 3])
+        # traj.append_waypoint(waypoint.to_msg())
+        #
+        # # neutral position
+        # waypoint.set_joint_angles([-0.155232421875, 0.4621865234375, -0.3448271484375, 0.4330361328125, 0.017708984375, -0.946375, 2.040958984375])
+        # traj.append_waypoint(waypoint.to_msg())
         #
         # # slight left (20 degree)
         # waypoint.set_joint_angles([0.178685546875, -0.2291533203125, -0.7179814453125, 1.633763671875, 2.1484375e-05, -1.3499716796875, 2.0902988281250003])
