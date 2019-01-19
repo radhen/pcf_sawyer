@@ -15,19 +15,25 @@ import numpy as np
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from angles_issue import grasp_generator
 
 
 class GetData(object):
     def __init__(self):
-        self.pcf_data = np.zeros((1,4))
-        self.endeff_data = np.zeros((1,15))
-        self.data = np.zeros((1,16))
+        self.pcf_data = np.empty((1,4))
+        self.endeff_data = np.empty((1,15))
+        self.data = np.empty((1,16))
+
+        # self.gg = grasp_generator()
 
 
     def start_recording(self):
 
         # self.pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_callback)
         # self.ft_sub = rospy.Subscriber("/robot/limb/right/endpoint_state", EndpointState, self.endeff_callback)
+
+        # broadcast the new frame you are going to subscribe in the next line
+        # self.gg.broadcast_frame()
 
         # MESSAGE FILTERS: http://docs.ros.org/api/message_filters/html/python/#message_filters.TimeSynchronizer
         self.pcf_sub = Subscriber("/sensor_values", Float32MultiArray)

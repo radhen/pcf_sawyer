@@ -161,8 +161,6 @@ history = network.fit(train_x, # Features
                       validation_data=(test_x, test_targets), # Data for evaluation
                       callbacks=callbacks_list)
 
-# tf.keras.backend.clear_session()
-
 loss_and_metrics = network.evaluate(test_x, test_targets, batch_size=10)
 print (loss_and_metrics)
 
