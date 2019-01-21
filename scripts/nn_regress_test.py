@@ -4,7 +4,7 @@ from keras.models import model_from_json
 import numpy as np
 import matplotlib.pyplot as plt
 import rospy
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimension
 import time
 import tensorflow as tf
 
@@ -17,12 +17,15 @@ class RealTimeTesting(object):
         self.arr = np.empty((1,2))
         self.arr_3d = np.empty((1,50,2))
 
-        self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111)
-        self.im = self.ax.imshow(np.random.random((3, 3)))
+        # self.fig = plt.figure()
+        # self.ax = self.fig.add_subplot(111)
+        # self.im = self.ax.imshow(np.random.random((3, 3)))
         # plt.show(block=False)
-        self.fig.show()
-        self.fig.canvas.draw()
+        # self.fig.show()
+        # self.fig.canvas.draw()
+
+        self.predict = rospy.Publisher("/nn_predictions", Float32MultiArray)
+
 
 
     def pcf_sub_func(self, msg, loaded_model):
@@ -35,12 +38,21 @@ class RealTimeTesting(object):
             with graph.as_default():
                 y_predict = loaded_model.predict(self.arr_3d)
             # print (y_predict)
-            self.im.set_array(np.random.random((3, 3)))
-            self.fig.canvas.draw()
-            plt.show()
+            # self.im.set_array(np.random.random((3, 3)))
+            # self.fig.canvas.draw()
+            # plt.show()
+                y_predict = [y_predict[0,0], y_predict[0,1], y_predict[0,2]]
+                msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 3, 1)], 1), y_predict)
+                self.predict.publish(msg)
+
+    def plot_func(self, msg):
+        self.im.set_array(np.random.random((3, 3)))
+        self.fig.canvas.draw()
+
 
     def listener(self, loaded_model):
         pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_sub_func, loaded_model)
+        # pcf_sub = rospy.Subscriber("/nn_predictions", Float32MultiArray, self.plot_func)
         rospy.spin()
 
 

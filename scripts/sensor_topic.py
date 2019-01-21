@@ -49,12 +49,12 @@ def sensor_node():
     rate = rospy.Rate(50)
     while not rospy.is_shutdown():
         #***** data from arduino ******#
-        values = next(c)
+        # values = next(c)
         #****** fake signal generation *****#
-        # sample_b = np.random.uniform(low=0.0, high=2.0, size=(1, 1))
-        # sample_ir = np.random.uniform(low=-0.5, high=3.0, size=(1, 1))
-        # values = np.concatenate((sample_b, sample_ir), axis=1)
-        # values = [values[0, 0], values[0, 1]]
+        sample_b = np.random.uniform(low=0.0, high=0.5, size=(1, 1))
+        sample_ir = np.random.uniform(low=-0.0, high=0.6, size=(1, 1))
+        values = np.concatenate((sample_b, sample_ir), axis=1)
+        values = [values[0, 0], values[0, 1]]
         msg = Float32MultiArray(
             MultiArrayLayout([MultiArrayDimension('sensor data', 2, 1)], 1),
             values)
