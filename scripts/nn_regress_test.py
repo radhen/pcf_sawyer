@@ -37,6 +37,7 @@ class RealTimeTesting(object):
             # print (y_predict)
             self.im.set_array(np.random.random((3, 3)))
             self.fig.canvas.draw()
+            plt.show()
 
     def listener(self, loaded_model):
         pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_sub_func, loaded_model)
