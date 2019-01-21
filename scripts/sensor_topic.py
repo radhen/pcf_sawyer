@@ -4,6 +4,7 @@ from __future__ import division, print_function
 import serial
 import rospy
 from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimension
+import numpy as np
 
 
 def collect_data(port='/dev/ttyACM0'):
@@ -45,10 +46,15 @@ def sensor_node():
     c = collect_data()
     #c = collect_data(port='/dev/ttyACM1')
     pub = rospy.Publisher('/sensor_values', Float32MultiArray, queue_size=10)
-    # rospy.init_node('sensor_node')
-    rate = rospy.Rate(500)
+    rate = rospy.Rate(50)
     while not rospy.is_shutdown():
+        #***** data from arduino ******#
         values = next(c)
+        #****** fake signal generation *****#
+        # sample_b = np.random.uniform(low=0.0, high=2.0, size=(1, 1))
+        # sample_ir = np.random.uniform(low=-0.5, high=3.0, size=(1, 1))
+        # values = np.concatenate((sample_b, sample_ir), axis=1)
+        # values = [values[0, 0], values[0, 1]]
         msg = Float32MultiArray(
             MultiArrayLayout([MultiArrayDimension('sensor data', 2, 1)], 1),
             values)
