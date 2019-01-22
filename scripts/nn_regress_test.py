@@ -37,10 +37,7 @@ class RealTimeTesting(object):
             self.arr_3d = self.arr[0+ws_0 : self.ws+ws_0].reshape(1,self.ws,2)
             with graph.as_default():
                 y_predict = loaded_model.predict(self.arr_3d)
-            # print (y_predict)
-            # self.im.set_array(np.random.random((3, 3)))
-            # self.fig.canvas.draw()
-            # plt.show()
+                print (y_predict)
                 y_predict = [y_predict[0,0], y_predict[0,1], y_predict[0,2]]
                 msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 3, 1)], 1), y_predict)
                 self.predict.publish(msg)
@@ -52,7 +49,6 @@ class RealTimeTesting(object):
 
     def listener(self, loaded_model):
         pcf_sub = rospy.Subscriber("/sensor_values", Float32MultiArray, self.pcf_sub_func, loaded_model)
-        # pcf_sub = rospy.Subscriber("/nn_predictions", Float32MultiArray, self.plot_func)
         rospy.spin()
 
 
@@ -80,19 +76,7 @@ if __name__ == "__main__":
 
     rlt.listener(loaded_model)
 
-    # rate = rospy.Rate(35)
-    # while not rospy.is_shutdown():
-    #     rospy.Subscriber("/sensor_values", Float32MultiArray, rlt.pcf_sub_func)
-    #     y_predict = loaded_model.predict(rlt.arr_3d)
-    #     print (y_predict)
-    #     # im.set_array(np.random.random((3, 3)))
-    #     # fig.canvas.draw()
-    #     rate.sleep()
-
-
     # arr = np.random.rand(50,2)
     # arr_3d = arr.reshape(1,50,2)
     # y = rlt.loaded_model.predict(arr_3d)
     # print (y)
-
-    # rospy.spin()

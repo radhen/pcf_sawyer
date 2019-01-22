@@ -15,9 +15,11 @@ class FingerSensorVisualizer(object):
     def __init__(self, topic='/nn_predictions'):
         self.nh = rospy.init_node('Visualizer', anonymous=True)
 
+        self.arr = np.zeros((3,3))
+
         cm = mpl.cm.get_cmap('YlOrRd')
         self.fig, self.ax = plt.subplots()
-        self.im = self.ax.imshow(np.random.random((3,3)),
+        self.im = self.ax.imshow(self.arr,
                                  cmap=cm,
                                  interpolation='none',
                                  vmin=0,
@@ -25,17 +27,17 @@ class FingerSensorVisualizer(object):
                                  # Doesn't seem to make a difference (?)
                                  animated=True)
 
-        # colorbar = self.fig.colorbar(self.im, orientation='horizontal')
+        colorbar = self.fig.colorbar(self.im, orientation='vertical')
         # colorbar.set_ticks(np.arange(12, 17))
-        # # LaTeX powers
+        # LaTeX powers
         # colorbar.set_ticklabels([r'$2^{{{}}}$'.format(i) for i in range(12, 17)])
-        # # Big numbers
+        # Big numbers
         # colorbar.set_ticklabels([str(int(i)) for i in np.logspace(12, 16, 5, base=2)])
 
-        self.ax.set_xticks([-6, -2, 2, 6])
-        self.ax.set_xticklabels([-6, -2, 2, 6])
-        self.ax.set_yticks([-6, -2, 2, 6])
-        self.ax.set_yticklabels([-6, -2, 2, 6])
+        self.ax.set_xticks(range(3))
+        self.ax.set_xticklabels([-40,0,40])
+        self.ax.set_yticks(range(3))
+        self.ax.set_yticklabels([-40,0,40])
         # self.ax.set_xlim(-60, 60)
         self.ax.grid()
         self.fig.show()
@@ -46,17 +48,29 @@ class FingerSensorVisualizer(object):
         self.sub = rospy.Subscriber(topic, Float32MultiArray, self.callback)
 
     def callback(self, msg):
-        # nparr = Int32MultiArray2np(msg)
-        # if nparr.shape != (16,):
-        #     raise ValueError("Need 3 sensor values!")
-        #
-        # data = nparr.reshape(2, 8)
-        # self.im.set_data(np.log2(data))
-        # self.ax.set_title(str(data))
-        # self.fig.canvas.draw()
 
-        self.im.set_array(np.random.random((6, 6)))
+        if (msg.data[1] <= 0.33):
+            i = 0
+        if (0.33 < msg.data[1] <= 0.66):
+            i = 1
+        if (0.66 < msg.data[1] <= 0.1):
+            i = 2
+        if (msg.data[2] <= 0.33):
+            j = 0
+        if (0.33 < msg.data[2] <= 0.66):
+            j = 1
+        if (0.66 < msg.data[2] <= 0.1):
+            j = 2
+
+        self.arr[i,j] = msg.data[0]
+        self.im.set_data(self.arr)
+
+        self.im.set_data(np.array([[0, 0, 0],
+                                   [0, msg.data[0], 0],
+                                   [0, 0, 0]]))
+
         self.fig.canvas.draw()
+
 
 
 if __name__ == '__main__':
