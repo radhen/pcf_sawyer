@@ -21,38 +21,95 @@ import math
 np.random.seed(0)
 
 
-
-# Generate FAKE features matrix and target vector
-# features, target = make_regression(n_samples = 10000,
-#                                    n_features = 3,
-#                                    n_informative = 3,
-#                                    n_targets = 1,
-#                                    noise = 0.0,
-#                                    random_state = 0)
-
-
 # TODO Clean all excel file reading stuff
 filename = '/home/radhen/Documents/expData/motion1/all/30deg/all_30d.xlsx'
-df_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
-df_20 = pd.read_excel(filename,sheet_name='Sheet2',header=None)
-df_25 = pd.read_excel(filename,sheet_name='Sheet3',header=None)
-df_30 = pd.read_excel(filename,sheet_name='Sheet4',header=None)
+df_30_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
+df_30_20 = pd.read_excel(filename,sheet_name='Sheet2',header=None)
+df_30_25 = pd.read_excel(filename,sheet_name='Sheet3',header=None)
+df_30_30 = pd.read_excel(filename,sheet_name='Sheet4',header=None)
 
-all_15 = df_15.as_matrix()
+all_30_15 = df_30_15.as_matrix()
 # all_15 = all_15[950:,:]
-all_20 = df_20.as_matrix()
+all_30_20 = df_30_20.as_matrix()
 # all_20 = all_20[750:,:]
-all_25 = df_25.as_matrix()
+all_30_25 = df_30_25.as_matrix()
 # all_25 = all_25[150:,:]
-all_30 = df_30.as_matrix()
+all_30_30 = df_30_30.as_matrix()
+# all_30 = all_30[350:,:]
+
+filename = '/home/radhen/Documents/expData/motion1/all/20deg/all_20d.xlsx'
+df_20_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
+df_20_20 = pd.read_excel(filename,sheet_name='Sheet2',header=None)
+df_20_25 = pd.read_excel(filename,sheet_name='Sheet3',header=None)
+df_20_30 = pd.read_excel(filename,sheet_name='Sheet4',header=None)
+
+all_20_15 = df_20_15.as_matrix()
+# all_15 = all_15[950:,:]
+all_20_20 = df_20_20.as_matrix()
+# all_20 = all_20[750:,:]
+all_20_25 = df_20_25.as_matrix()
+# all_25 = all_25[150:,:]
+all_20_30 = df_20_30.as_matrix()
 # all_30 = all_30[350:,:]
 
 
-all = all_15
-all = np.append(all,all_20,axis=0)
-all = np.append(all,all_25,axis=0)
-all = np.append(all,all_30,axis=0)
+all_30 = all_30_15
+all_30 = np.append(all_30,all_30_20,axis=0)
+all_30 = np.append(all_30,all_30_25,axis=0)
+all_30 = np.append(all_30,all_30_30,axis=0)
 
+all_20 = all_20_15
+all_20 = np.append(all_20,all_30_20,axis=0)
+all_20 = np.append(all_20,all_30_25,axis=0)
+all_20 = np.append(all_20,all_30_30,axis=0)
+
+filename = '/home/radhen/Documents/expData/motion1/left/45deg/left_45d.xlsx'
+df_45_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
+df_45_20 = pd.read_excel(filename,sheet_name='Sheet2',header=None)
+df_45_25 = pd.read_excel(filename,sheet_name='Sheet3',header=None)
+df_45_30 = pd.read_excel(filename,sheet_name='Sheet4',header=None)
+
+all_45_15 = df_45_15.as_matrix()
+# all_15 = all_15[950:,:]
+all_45_20 = df_45_20.as_matrix()
+# all_20 = all_20[750:,:]
+all_45_25 = df_45_25.as_matrix()
+# all_25 = all_25[150:,:]
+all_45_30 = df_45_30.as_matrix()
+# all_30 = all_30[350:,:]
+
+all_45 = all_45_15
+all_45 = np.append(all_45,all_45_20,axis=0)
+all_45 = np.append(all_45,all_45_25,axis=0)
+all_45 = np.append(all_45,all_45_30,axis=0)
+
+filename = '/home/radhen/Documents/expData/motion1/right/45deg/right_45d.xlsx'
+df_45r_15 = pd.read_excel(filename,sheet_name='Sheet1',header=None)
+df_45r_20 = pd.read_excel(filename,sheet_name='Sheet2',header=None)
+df_45r_25 = pd.read_excel(filename,sheet_name='Sheet3',header=None)
+df_45r_30 = pd.read_excel(filename,sheet_name='Sheet4',header=None)
+
+all_45r_15 = df_45r_15.as_matrix()
+# all_15 = all_15[950:,:]
+all_45r_20 = df_45r_20.as_matrix()
+# all_20 = all_20[750:,:]
+all_45r_25 = df_45r_25.as_matrix()
+# all_25 = all_25[150:,:]
+all_45r_30 = df_45r_30.as_matrix()
+# all_30 = all_30[350:,:]
+
+all_45r = all_45r_15
+all_45r = np.append(all_45r,all_45r_20,axis=0)
+all_45r = np.append(all_45r,all_45r_25,axis=0)
+all_45r = np.append(all_45r,all_45r_30,axis=0)
+
+all = all_20
+all = np.append(all,all_30,axis=0)
+all = np.append(all,all_45,axis=0)
+all = np.append(all,all_45r,axis=0)
+
+
+print ('Number of DATA points = '+str(all.shape[0]))
 
 # Initial definations of targets and features for the problem
 F = np.sqrt(np.square(all[:,8]) + np.square(all[:,9]) + np.square(all[:,10]))  #resultant force F = sqrt(Fx^2+Fy^2+Fz^2)
