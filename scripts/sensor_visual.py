@@ -20,30 +20,29 @@ class FingerSensorVisualizer(object):
 
         self.arr = np.zeros((3,3))
 
-        # cm = mpl.cm.get_cmap('YlOrRd')
-        # self.fig, self.ax = plt.subplots()
-        # self.im = self.ax.imshow(self.arr,
-        #                          cmap=cm,
-        #                          interpolation='none',
-        #                          vmin=0,
-        #                          vmax=1,
-        #                          animated=True)
+        cm = mpl.cm.get_cmap('YlOrRd')
+        self.fig, self.ax = plt.subplots()
+        self.im = self.ax.imshow(self.arr,
+                                 cmap=cm,
+                                 interpolation='none',
+                                 vmin=0,
+                                 vmax=255,
+                                 animated=True)
 
-        # colorbar = self.fig.colorbar(self.im, orientation='vertical')
+        colorbar = self.fig.colorbar(self.im, orientation='vertical')
         # colorbar.set_ticks(np.arange(12, 17))
-        # LaTeX powers
+        ##LaTeX powers
         # colorbar.set_ticklabels([r'$2^{{{}}}$'.format(i) for i in range(12, 17)])
-        # Big numbers
+        ##Big numbers
         # colorbar.set_ticklabels([str(int(i)) for i in np.logspace(12, 16, 5, base=2)])
 
-        # self.ax.set_xticks(range(3))
-        # self.ax.set_xticklabels([-40,0,40])
-        # self.ax.set_yticks(range(3))
-        # self.ax.set_yticklabels([-40,0,40])
-        # self.ax.set_xlim(-60, 60)
-        # self.ax.grid()
-        # self.fig.show()
-        # self.fig.canvas.draw()
+        self.ax.set_xticks(range(3))
+        self.ax.set_xticklabels([-40,0,40])
+        self.ax.set_yticks(range(3))
+        self.ax.set_yticklabels([-40,0,40])
+        self.ax.grid()
+        self.fig.show()
+        self.fig.canvas.draw()
 
         self.pcf_image = rospy.Publisher("/pcf_image", Image, queue_size=5)
         self.bridge = CvBridge()
@@ -55,13 +54,13 @@ class FingerSensorVisualizer(object):
             i = 0
         if (0.33 < msg.data[1] <= 0.66):
             i = 1
-        if (0.66 < msg.data[1] <= 0.1):
+        if (0.66 < msg.data[1] <= 1):
             i = 2
         if (msg.data[2] <= 0.33):
             j = 0
         if (0.33 < msg.data[2] <= 0.66):
             j = 1
-        if (0.66 < msg.data[2] <= 0.1):
+        if (0.66 < msg.data[2] <= 1):
             j = 2
 
         self.arr = np.zeros((3,3))
@@ -93,5 +92,5 @@ class FingerSensorVisualizer(object):
 
 if __name__ == '__main__':
     vis = FingerSensorVisualizer()
-    # plt.show()
+    plt.show()
     rospy.spin()

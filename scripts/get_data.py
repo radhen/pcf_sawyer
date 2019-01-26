@@ -18,14 +18,13 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from angles_issue import grasp_generator
 
 
+
 class GetData(object):
     def __init__(self):
         self.pcf_data = np.empty((1,4))
         self.endeff_data = np.empty((1,15))
         self.data = np.empty((1,16))
-
         # self.gg = grasp_generator()
-
 
     def start_recording(self):
 
@@ -40,7 +39,7 @@ class GetData(object):
         self.ft_sub = Subscriber("/robot/limb/right/endpoint_state", EndpointState)
         self.pose_sub = Subscriber("/new_right_gripper_frame", PoseStamped)
 
-        ats = ApproximateTimeSynchronizer([self.pcf_sub, self.ft_sub, self.pose_sub], queue_size=5, slop=0.01, allow_headerless=True)
+        ats = ApproximateTimeSynchronizer([self.pcf_sub, self.ft_sub, self.pose_sub], queue_size=5, slop=0.1, allow_headerless=True)
         ats.registerCallback(self.got_data)
 
 
@@ -134,7 +133,7 @@ if __name__ == "__main__":
     gd = GetData()
     # while 1:
     gd.start_recording()
-    rospy.sleep(3)
+    rospy.sleep(30)
     gd.stop_recording()
     gd.convertandsave('test')
     # rospy.spin()

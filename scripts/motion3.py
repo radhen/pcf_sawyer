@@ -60,7 +60,7 @@ def main():
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[0.0, 0.0, -20.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, -15.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
@@ -121,17 +121,66 @@ def main():
                                      max_joint_accel=args.accel_ratio)
     waypoint = MotionWaypoint(options=wpt_opts.to_msg(), limb=limb)
 
+    joint_angles = limb.joint_ordered_angles()
+    waypoint.set_joint_angles(joint_angles=joint_angles)
+    traj.append_waypoint(waypoint.to_msg())
+
+    # rotate wrist joint 20deg. ()0.349 rad)
+    args.joint_angles[6] = args.joint_angles[6] - 0.349066
+
+    waypoint.set_joint_angles(joint_angles=args.joint_angles)
+    traj.append_waypoint(waypoint.to_msg())
+
+    result = traj.send_trajectory(timeout=args.timeout)
+
+    if result is None:
+        rospy.logerr('Trajectory FAILED to send!')
+        return
+    if result.result:
+        rospy.loginfo('Motion controller successfully finished the trajectory with interaction options set!')
+    else:
+        rospy.logerr('Motion controller failed to complete the trajectory with error %s', result.errorId)
+
     ic_pub = InteractionPublisher()
 
     gd = GetData()
     gd.start_recording()
 
     for _ in range(3):
-        joint_angles = limb.joint_ordered_angles()
-        waypoint.set_joint_angles(joint_angles=joint_angles)
-        traj.append_waypoint(waypoint.to_msg())
+        traj.clear_waypoints()
+        args.joint_angles[6] = args.joint_angles[6] + 0.349066
         waypoint.set_joint_angles(joint_angles=args.joint_angles)
         traj.append_waypoint(waypoint.to_msg())
+
+        for _ in range(5):
+            # print the resultant interaction options once
+            rospy.loginfo(interaction_options.to_msg())
+
+            ic_pub = InteractionPublisher()
+            rospy.sleep(0.5)
+            ic_pub.send_command(interaction_options, args.rate)
+            if args.rate == 0:
+                rospy.sleep(2)
+            rospy.on_shutdown(ic_pub.send_position_mode_cmd)
+
+            args.force_command[2] -= 2
+            interaction_options.set_force_command(args.force_command)
+
+        for _ in range(5):
+            # print the resultant interaction options once
+            rospy.loginfo(interaction_options.to_msg())
+
+            ic_pub = InteractionPublisher()
+            rospy.sleep(0.5)
+            ic_pub.send_command(interaction_options, args.rate)
+            if args.rate == 0:
+                rospy.sleep(2)
+            rospy.on_shutdown(ic_pub.send_position_mode_cmd)
+
+            args.force_command[2] += 2
+            interaction_options.set_force_command(args.force_command)
+
+        args.force_command[2] = -15
         result = traj.send_trajectory(timeout=args.timeout)
         if result is None:
             rospy.logerr('Trajectory FAILED to send!')
@@ -139,31 +188,19 @@ def main():
         if result.result:
             rospy.loginfo('Motion controller successfully finished the trajectory with interaction options set!')
         else:
-            rospy.logerr('Motion controller failed to complete the trajectory with error %s',
-                         result.errorId)
-
-
-        # print the resultant interaction options once
-        rospy.loginfo(interaction_options.to_msg())
-
-        ic_pub = InteractionPublisher()
-        rospy.sleep(0.5)
-        ic_pub.send_command(interaction_options, args.rate)
-        if args.rate == 0:
-            rospy.sleep(5)
-        rospy.on_shutdown(ic_pub.send_position_mode_cmd)
-
-        traj.clear_waypoints()
+            rospy.logerr('Motion controller failed to complete the trajectory with error %s', result.errorId)
 
         # rotate wrist joint 15deg. ()0.26166 rad) incre. 7times = 90deg
-        args.joint_angles[6] = args.joint_angles[6] + 0.1
+        # args.joint_angles[6] = args.joint_angles[6] + 0.1
 
     # Finally robot go to home position
     joint_angles = limb.joint_ordered_angles()
     waypoint.set_joint_angles(joint_angles=joint_angles)
     traj.append_waypoint(waypoint.to_msg())
+
     waypoint.set_joint_angles(joint_angles=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.89727734375])
     traj.append_waypoint(waypoint.to_msg())
+
     result = traj.send_trajectory(timeout=args.timeout)
     if result is None:
         rospy.logerr('Trajectory FAILED to send!')
@@ -176,7 +213,9 @@ def main():
 
 
     gd.stop_recording()
-    gd.convertandsave('35N')
+    gd.convertandsave('motion3_test')
+
+    print ("Done. Saved data.")
 
 
 if __name__ == '__main__':

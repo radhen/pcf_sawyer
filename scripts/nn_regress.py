@@ -150,7 +150,7 @@ def preprocessData(X):
 
     return (X)
 
-features = preprocessData(features)
+# features = preprocessData(features)
 targets = preprocessData(targets)
 
 # Divide our data into training and test sets.
