@@ -10,9 +10,9 @@ from geometry_msgs.msg import (
 class Orientations:
     #x, y, z define axis, w defines how much rotation around that axis
     FORWARD_POINT = Quaternion(
-        x=0,
+        x=0.0,
         y=0.707,
-        z=0,
+        z=0.0,
         w=0.707,
     )
 

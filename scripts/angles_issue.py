@@ -11,13 +11,14 @@ from geometry_msgs.msg import PoseStamped
 
 class grasp_generator(object):
     def __init__(self):
-
+        # rospy.init_node("grasp_generator")
         self.tfBuffer = tf2_ros.Buffer()
         self.listen = tf2_ros.TransformListener(self.tfBuffer)
         self.listener = tf.TransformListener()
         self.broadcast = tf.TransformBroadcaster()
 
         self.pub = rospy.Publisher('new_right_gripper_frame', PoseStamped, queue_size=10)
+        self.broadcast_frame()
 
 
     def getOffsetPoses(self, translation, quaternion, requrd_rot, requrd_trans):
@@ -97,4 +98,5 @@ if __name__ == '__main__':
     # rate = rospy.Rate(100)
     gg.broadcast_frame()
     rospy.spin()
+
 

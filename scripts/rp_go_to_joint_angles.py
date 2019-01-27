@@ -27,7 +27,7 @@ def main():
                                      description=main.__doc__)
     parser.add_argument(
         "-q", "--joint_angles", type=float,
-        nargs='+', default=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.54821134375],
+        nargs='+', default=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.89727734375],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
         "-s",  "--speed_ratio", type=float, default=0.1,
