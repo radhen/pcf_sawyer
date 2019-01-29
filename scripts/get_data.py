@@ -117,14 +117,14 @@ class GetData(object):
         self.ft_sub.unregister()
 
 
-    def convertandsave(self,i):
+    def convertandsave(self,i,j):
         # convert to numpy array and save
-        path = '/home/radhen/Documents/expData'
+        path = '/home/radhen/Documents/expData/motion3/motion3_bf/roll'
 
         # np.savetxt(path+'/pcf_data_{}.txt'.format(i), self.pcf_data)
         # np.savetxt(path+'/endeff_data_{}.txt'.format(i), self.endeff_data)
 
-        np.savetxt(path + '/{}.txt'.format(i), self.data)
+        np.savetxt(path + '/lr_{}_{}.txt'.format(i,j), self.data)
 
 
 

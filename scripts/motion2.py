@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 
+'''
+Motion2 applies constant load on the table with varying roll angles (left to right, refer to the video on Google drive)
+'''
+
 import rospy
 import argparse
 from geometry_msgs.msg import Pose

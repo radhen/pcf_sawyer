@@ -1,5 +1,11 @@
 #! /usr/bin/env python
 
+'''
+Motion1 is a continous roll motion from left to right to front and finally back while the
+finger is pressed on a table for a given constant load (refer to the video on Google drive)
+Majority of the code is taken from the go_to_joint_angles_in_contact.py from the intera_sdk example scripts.
+'''
+
 import rospy
 import argparse
 from geometry_msgs.msg import Pose

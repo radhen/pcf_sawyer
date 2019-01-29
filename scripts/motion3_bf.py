@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 
+'''
+Motion3_bf applies varying load forces at varying pitch angles. Robot control is in cartesian space.
+'''
+
 import rospy
 import argparse
 from geometry_msgs.msg import Pose
@@ -15,10 +19,59 @@ from intera_motion_interface import (
 )
 from intera_interface import Limb
 from get_data import GetData
+import numpy as np
 
 from grip_and_record.inverse_kin import *
 from grip_and_record.robot_utils import Orientations
-import numpy as np
+from geometry_msgs.msg import (
+    PoseStamped,
+    Pose,
+    Point,
+    Quaternion,
+)
+import intera_interface
+from intera_interface import CHECK_VERSION
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+
+
+def init_robot(limb_name):
+    epilog = """
+    See help inside the example with the '?' key for key bindings.
+        """
+    rp = intera_interface.RobotParams()
+    valid_limbs = rp.get_limb_names()
+    if not valid_limbs:
+        rp.log_message(("Cannot detect any limb parameters on this robot. "
+                        "Exiting."), "ERROR")
+        return
+
+    rp.log_message('Initializing node... ')
+
+    rp.log_message('Getting robot state...  ')
+    rs = intera_interface.RobotEnable(CHECK_VERSION)
+    init_state = rs.state().enabled
+
+    def clean_shutdown():
+        print("\nExiting example.")
+        if not init_state:
+            rp.log_message('Disabling robot...')
+            rs.disable()
+
+    rospy.on_shutdown(clean_shutdown)
+
+    rospy.loginfo("Enabling robot...")
+    rs.enable()
+    if not limb_name in valid_limbs:
+        rp.log_message(("Right is not a valid limb on this robot. "
+                        "Exiting."), "ERROR")
+        return
+    limb = intera_interface.Limb(limb_name)
+    limb.set_joint_position_speed(0.05)
+    # Move to a safe position
+    # goto_rest_pos(limb=limb)
+    return limb
+
 
 def main():
 
@@ -28,14 +81,14 @@ def main():
 
     parser.add_argument(
         "-ras", "--rot_angle_steps", type=float,
-        nargs='+',default=2, help="Number of rotations on one side")
+        nargs='+',default=8, help="Number of rotations on one side")
     parser.add_argument(
         "-rass", "--rot_angle_step_size", type=float,
-        nargs='+', default=np.deg2rad(20), help="Number of rotations on one side")
+        nargs='+', default=5, help="Number of rotations on one side")
     parser.add_argument(
         "-q", "--joint_angles", type=float,
         nargs='+',
-        default=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.89727734375],
+        default=[0.2762744140625, 0.4580771484375, -1.34878125, 1.2746865234375, 0.562228515625, -1.14392578125, 2.9527685546875],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
         "-sr", "--speed_ratio", type=float, default=0.001,
@@ -70,7 +123,7 @@ def main():
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[0.0, 0.0, -15.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, -6.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
@@ -124,103 +177,64 @@ def main():
     interaction_options.set_disable_reference_resetting(args.disable_reference_resetting)
     interaction_options.set_rotations_for_constrained_zeroG(args.rotations_for_constrained_zeroG)
 
+    limb_name = "right"
+    limb = init_robot(limb_name=limb_name)
 
-    limb = Limb()
-    traj = MotionTrajectory(limb=limb)
-    wpt_opts = MotionWaypointOptions(max_joint_speed_ratio=args.speed_ratio,
-                                     max_joint_accel=args.accel_ratio)
-    waypoint = MotionWaypoint(options=wpt_opts.to_msg(), limb=limb)
+    xyz = [0.8, 0.0, 0.0]
+    q = quaternion_from_euler(0.0, np.deg2rad(90), 0.0)
+    orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    des_pose = get_pose(xyz[0], xyz[1], xyz[2], orientation)
+    curr_pose = limb.joint_angles()  # Measure current position
+    joint_positions = get_joint_angles(des_pose, limb.name, curr_pose, use_advanced_options=True)
+    limb.move_to_joint_positions(joint_positions, timeout=20, threshold=0.01)  # Send the command to the arm
 
-    # xyz = [0.8, 0.0 , 0.2]
-    # des_pose = get_pose(xyz[0], xyz[1], xyz[2], Orientations.FORWARD_POINT)
-    # curr_pos = limb.joint_angles()  # Measure current position
-    # joint_positions = get_joint_angles(des_pose, limb.name, curr_pos, use_advanced_options=True)  # gets joint positions
-    # args.joint_angles = joint_positions.values()
-    # args.joint_angles = args.joint_angles.reverse()
-
-    # rotate wrist joint 20deg. ()0.349 rad)
-    args.joint_angles[6] = args.joint_angles[6] - (args.rot_angle_step_size * args.rot_angle_steps)
-
-    waypoint.set_joint_angles(joint_angles=args.joint_angles)
-    traj.append_waypoint(waypoint.to_msg())
-
-    result = traj.send_trajectory(timeout=args.timeout)
-
-    if result is None:
-        rospy.logerr('Trajectory FAILED to send!')
-        return
-    if result.result:
-        rospy.loginfo('Motion controller successfully finished the trajectory with interaction options set!')
-    else:
-        rospy.logerr('Motion controller failed to complete the trajectory with error %s', result.errorId)
-
-    traj.clear_waypoints()
+    angle = 90 - (args.rot_angle_step_size * args.rot_angle_steps)
+    q = quaternion_from_euler(0.0, np.deg2rad(angle), 0.0)
+    orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    des_pose = get_pose(xyz[0], xyz[1], xyz[2], orientation)
+    curr_pose = limb.joint_angles()  # Measure current position
+    joint_positions = get_joint_angles(des_pose, limb.name, curr_pose, use_advanced_options=True)
+    limb.move_to_joint_positions(joint_positions, timeout=20, threshold=0.01)  # Send the command to the arm
 
     ic_pub = InteractionPublisher()
 
-    gd = GetData()
-    gd.start_recording()
+    for i in range(2 * args.rot_angle_steps + 1):
 
-    for _ in range(2 * args.rot_angle_steps + 1):
+        gd = GetData()
+        gd.start_recording()
 
-        for _ in range(5):
+        for _ in range(15):
             # print the resultant interaction options once
             rospy.loginfo(interaction_options.to_msg())
-            ic_pub = InteractionPublisher()
-            rospy.sleep(0.5)
             ic_pub.send_command(interaction_options, args.rate)
             if args.rate == 0:
                 rospy.sleep(1)
-            rospy.on_shutdown(ic_pub.send_position_mode_cmd)
             args.force_command[2] -= 2
             interaction_options.set_force_command(args.force_command)
 
-        for _ in range(5):
+        for _ in range(15):
             # print the resultant interaction options once
             rospy.loginfo(interaction_options.to_msg())
-            ic_pub = InteractionPublisher()
-            rospy.sleep(0.5)
             ic_pub.send_command(interaction_options, args.rate)
             if args.rate == 0:
                 rospy.sleep(1)
-            rospy.on_shutdown(ic_pub.send_position_mode_cmd)
             args.force_command[2] += 2
             interaction_options.set_force_command(args.force_command)
 
-        args.joint_angles[6] = args.joint_angles[6] + args.rot_angle_step_size
-        waypoint.set_joint_angles(joint_angles=args.joint_angles)
-        traj.append_waypoint(waypoint.to_msg())
+        gd.stop_recording()
+        gd.convertandsave(i)
 
-        result = traj.send_trajectory(timeout=args.timeout)
+        args.force_command[2] = -6
 
-        if result is None:
-            rospy.logerr('Trajectory FAILED to send!')
-        if result.result:
-            rospy.loginfo('Motion controller successfully finished the trajectory with interaction options set!')
-        else:
-            rospy.logerr('Motion controller failed to complete the trajectory with error %s',
-                         result.errorId)
+        ic_pub.send_position_mode_cmd()
 
-        traj.clear_waypoints()
-        args.force_command[2] = -15
-
-    # Finally robot go to home position
-    waypoint.set_joint_angles(joint_angles=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.89727734375])
-    traj.append_waypoint(waypoint.to_msg())
-
-    result = traj.send_trajectory(timeout=args.timeout)
-    if result is None:
-        rospy.logerr('Trajectory FAILED to send!')
-        return
-    if result.result:
-        rospy.loginfo('Motion controller successfully finished the trajectory with interaction options set!')
-    else:
-        rospy.logerr('Motion controller failed to complete the trajectory with error %s',
-                     result.errorId)
-
-
-    gd.stop_recording()
-    gd.convertandsave('motion3_test_4_fs')
+        angle += args.rot_angle_step_size
+        q = quaternion_from_euler(0.0, np.deg2rad(angle), 0.0)
+        orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+        des_pose = get_pose(0.8, 0.0, 0.01, orientation)
+        curr_pose = limb.joint_angles()  # Measure current position
+        joint_positions = get_joint_angles(des_pose, limb.name, curr_pose, use_advanced_options=True)
+        limb.move_to_joint_positions(joint_positions, timeout=20, threshold=0.01)  # Send the command to the arm
 
     print ("Done. Saved data.")
 
