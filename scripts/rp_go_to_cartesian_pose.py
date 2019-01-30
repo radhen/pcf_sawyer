@@ -39,7 +39,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=arg_fmt,
                                      description=main.__doc__)
     parser.add_argument(
-        "-p", "--position", type=float, default=[0.8, 0.0, 0.3],
+        "-p", "--position", type=float, default=[0.8, 0.0, 0.4],
         nargs='+',
         help="Desired end position: X, Y, Z")
     parser.add_argument(

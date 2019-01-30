@@ -74,13 +74,13 @@ def main():
 
     parser.add_argument(
         "-rolls", "--roll_steps", type=float,
-        nargs='+',default=8, help="Number of rotations on one side")
+        nargs='+',default=3, help="Number of rotations on one side")
     parser.add_argument(
         "-rollss", "--roll_step_size", type=float,
-        nargs='+', default=5, help="Size of roll in degree")
+        nargs='+', default=10, help="Size of roll in degree")
     parser.add_argument(
         "-pitchs", "--pitch_steps", type=float,
-        nargs='+', default=8, help="Number of rotations on one side")
+        nargs='+', default=4, help="Number of rotations on one side")
     parser.add_argument(
         "-pitchss", "--pitch_step_size", type=float,
         nargs='+', default=5, help="Size of pitch in degree")
@@ -90,10 +90,10 @@ def main():
         default=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.89727734375],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
-        "-sr", "--speed_ratio", type=float, default=0.05,
+        "-sr", "--speed_ratio", type=float, default=0.001,
         help="A value between 0.001 (slow) and 1.0 (maximum joint velocity)")
     parser.add_argument(
-        "-a", "--accel_ratio", type=float, default=0.05,
+        "-a", "--accel_ratio", type=float, default=0.001,
         help="A value between 0.001 (slow) and 1.0 (maximum joint accel)")
     parser.add_argument(
         "-s",  "--interaction_active", type=int, default=1, choices = [0, 1],
@@ -122,17 +122,17 @@ def main():
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[0.0, 0.0, -6.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, -10.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
-        nargs='+', default=[100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+        nargs='+', default=[1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0],
         help="A list of desired nullspace stiffnesses, one for each of the 7 joints (a single value can be provided to apply the same value to all the directions) -- units are in (Nm/rad)")
     parser.add_argument(
         "-dd",  "--disable_damping_in_force_control", action='store_true', default=False,
         help="Disable damping in force control")
     parser.add_argument(
-        "-dr",  "--disable_reference_resetting", action='store_true', default=False,
+        "-dr",  "--disable_reference_resetting", action='store_true', default=True,
         help="The reference signal is reset to actual position to avoid jerks/jumps when interaction parameters are changed. This option allows the user to disable this feature.")
     parser.add_argument(
         "-rc",  "--rotations_for_constrained_zeroG", action='store_true', default=False,
@@ -199,7 +199,7 @@ def main():
     limb_name = "right"
     limb = init_robot(limb_name=limb_name)
 
-    xyz = [0.8, 0.0, 0.2]
+    xyz = [0.8, 0.0, 0.4]
     roll_angle = args.roll_step_size * args.roll_steps
     pitch_angle = 90 - (args.pitch_step_size * args.pitch_steps)
 
@@ -211,6 +211,7 @@ def main():
     vector = np.multiply(np.array([q_1[0],q_1[1],q_1[2]]), q_2[3]) + np.multiply(np.array([q_2[0],q_2[1],q_2[2]]), q_1[3]) + np.cross(np.array([q_2[0],q_2[1],q_2[2]]), np.array([q_1[0],q_1[1],q_1[2]]))
     q_3 = [vector[0], vector[1], vector[2], scalar]
     orientation = Quaternion(x=q_3[0], y=q_3[1], z=q_3[2], w=q_3[3])
+
     des_pose = get_pose(xyz[0], xyz[1], xyz[2], orientation)
     curr_pose = limb.joint_angles()  # Measure current position
     joint_positions = get_joint_angles(des_pose, limb.name, curr_pose, use_advanced_options=True)
@@ -223,8 +224,9 @@ def main():
     for j in range(2 * args.pitch_steps + 1):
 
         for i in range(2 * args.roll_steps + 1):
-            # gd = GetData()
-            # gd.start_recording()
+
+            gd = GetData()
+            gd.start_recording()
 
             for _ in range(5):
                 # print the resultant interaction options once
@@ -243,8 +245,8 @@ def main():
                 args.force_command[2] += 2
                 interaction_options.set_force_command(args.force_command)
 
-            # gd.stop_recording()
-            # gd.convertandsave(i,j)
+            gd.stop_recording()
+            gd.convertandsave(i,j)
 
             ic_pub.send_position_mode_cmd()
 
@@ -275,9 +277,13 @@ def main():
             joint_positions = get_joint_angles(des_pose, limb.name, curr_pose, use_advanced_options=True)
             limb.move_to_joint_positions(joint_positions, timeout=20, threshold=0.01)  # Send the command to the arm
 
-            args.force_command[2] = -6
+            args.force_command[2] = -10
 
+        # reset roll angle
+        roll_angle = args.roll_step_size * args.roll_steps
+        # increment the pitch angle
         pitch_angle += args.pitch_step_size
+
         q_1 = quaternion_from_euler(0.0, 0.0, -np.deg2rad(roll_angle))
         q_2 = quaternion_from_euler(0.0, np.deg2rad(pitch_angle), 0.0)
         scalar = (q_1[3] * q_2[3]) - np.dot(np.array([q_1[0], q_1[1], q_1[2]]), np.array([q_2[0], q_2[1], q_2[2]]))
