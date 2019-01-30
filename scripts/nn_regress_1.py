@@ -19,13 +19,18 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     return y
 
 
-folderIN = '/home/radhen/Documents/expData/motion3/'
+folderIN = '/home/radhen/Documents/expData/motion3/lr_bf_roll3x10_pitch4x5/'
 filename = [f for f in os.listdir(folderIN) if f.endswith('.txt')]
 lr = {}
 bf = {}
-for i in range(len(filename)):
-    lr[i] = np.loadtxt(folderIN + '/motion3_lr/lr_{}.txt'.format(i))
-    bf[i] = np.loadtxt(folderIN + '/motion3_bf/bf_{}.txt'.format(i))
+for i in range(7):
+    plt.figure()
+    for j in range(9):
+        lr[i] = np.loadtxt(folderIN + '/lr_bf_{}_{}.txt'.format(i,j))
+        # bf[i] = np.loadtxt(folderIN + '/bf_{}.txt'.format(i))
+        plt.plot(lr[i][100:,14])
+
+plt.show()
 
 
 # Filter requirements.

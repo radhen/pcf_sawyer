@@ -90,10 +90,10 @@ def main():
         default=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.89727734375],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
-        "-sr", "--speed_ratio", type=float, default=0.001,
+        "-sr", "--speed_ratio", type=float, default=0.05,
         help="A value between 0.001 (slow) and 1.0 (maximum joint velocity)")
     parser.add_argument(
-        "-a", "--accel_ratio", type=float, default=0.001,
+        "-a", "--accel_ratio", type=float, default=0.05,
         help="A value between 0.001 (slow) and 1.0 (maximum joint accel)")
     parser.add_argument(
         "-s",  "--interaction_active", type=int, default=1, choices = [0, 1],
