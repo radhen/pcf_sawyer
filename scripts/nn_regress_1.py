@@ -21,17 +21,25 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 folderIN = '/home/radhen/Documents/expData/motion3/lr_bf_roll3x10_pitch4x5/'
 filename = [f for f in os.listdir(folderIN) if f.endswith('.txt')]
-lr = {}
-bf = {}
-for i in range(7):
+data_roll = {} #each arr in dict a single load un-load curve for a given pitch and roll
+data_pitch = {}
+for i in range(7): # pitch
+    for j in range(9): # roll
+        data_roll[j] = np.loadtxt(folderIN + '/lr_bf_{}_{}.txt'.format(i,j))
+    data_pitch[i] = data_roll
+    data_roll = {}
+
+data_all = {}
+data_all = data_pitch
+
+
+for i in range(len(data_all)):
     plt.figure()
-    for j in range(9):
-        lr[i] = np.loadtxt(folderIN + '/lr_bf_{}_{}.txt'.format(i,j))
-        # bf[i] = np.loadtxt(folderIN + '/bf_{}.txt'.format(i))
-        plt.plot(lr[i][100:,14])
+    for j in range(len(data_all[0])):
+        plt.plot(data_all[i][j][:,5])
 
 plt.show()
-
+print ('wait')
 
 # Filter requirements.
 # order = 6
@@ -48,5 +56,13 @@ plt.show()
 # dydx_ir_norm = np.abs(dydx_ir)/np.max(dydx_ir)
 # peaks, _ = find_peaks(dydx_ir_norm,height=0.05)
 
+
+# Initial definations of targets and features for the problem
+# F = data
+# theta = all[:,5]
+# alpha = all[:,6]
+# targets = np.column_stack((F, theta))
+# targets = np.column_stack((targets, alpha)) # [F, theta, alpha]
+# features = all[:,14:16] # [baro, ir]
 
 print ("done")
