@@ -55,7 +55,7 @@ class grasp_generator(object):
             rotation = [trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w]
 
             # Identity matrix. Set the requ rot n trans wrt obj frame
-            requrd_rot = (0.0, -1.57, 0) # in radians
+            requrd_rot = (0.0, 3.14, 0) # in radians
             requrd_trans = (0.0, 0.0, 0.0)
             requrd_trans = tuple(x for x in requrd_trans)
             # calculate and get- an offset frame w/o ref to objct frame

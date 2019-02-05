@@ -61,9 +61,9 @@ def main():
         waypoint.set_joint_angles(joint_angles = args.joint_angles)
         traj.append_waypoint(waypoint.to_msg())
 
-        for _ in range(100):
+        for _ in range(200):
             # slight right (20 degree)
-            waypoint.set_joint_angles([-0.04209765625, -0.03077734375, -0.489986328125, 0.788107421875, -0.0457724609375, -0.81256640625, 3])
+            waypoint.set_joint_angles([-0.04209765625, -0.03077734375, -0.489986328125, 0.788107421875, -0.0457724609375, -0.91256640625, 3])
             traj.append_waypoint(waypoint.to_msg())
 
             # neutral position

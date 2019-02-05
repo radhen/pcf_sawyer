@@ -14,9 +14,9 @@ class RealTimeTesting(object):
 
     def __init__(self):
 
-        self.ws = 50
+        self.ws = 100
         self.arr = np.empty((1,2))
-        self.arr_3d = np.empty((1,50,2))
+        self.arr_3d = np.empty((1,self.ws,2))
 
         # self.fig = plt.figure()
         # self.ax = self.fig.add_subplot(111)
@@ -32,7 +32,7 @@ class RealTimeTesting(object):
     def pcf_sub_func(self, msg, loaded_model):
         # print (msg.data[0])
         self.arr = np.append(self.arr, [[msg.data[0], msg.data[1]]], axis=0)
-        if (self.arr.shape[0] >= 50):
+        if (self.arr.shape[0] >= self.ws):
             ws_0 = self.arr.shape[0] - self.ws
             # print ("(" + str(0 + ws_0) + " , " + str(self.ws + ws_0) + ")")
             self.arr_3d = self.arr[0+ws_0 : self.ws+ws_0].reshape(1,self.ws,2)
@@ -61,12 +61,12 @@ if __name__ == "__main__":
 
     # load json and create model
     # https://machinelearningmastery.com/save-load-keras-deep-learning-models/
-    json_file = open('model.json', 'r')
+    json_file = open('motion3_model.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     loaded_model = model_from_json(loaded_model_json)
     # load weights into new model
-    loaded_model.load_weights("weights.best.hdf5")
+    loaded_model.load_weights("motion3_weights.best.hdf5")
     print("Loaded model from disk")
     # evaluate loaded model on test data
     loaded_model.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])

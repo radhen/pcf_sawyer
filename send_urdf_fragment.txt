@@ -1,2 +1,2 @@
-python /home/radhen/catkin_ws/src/intera_sdk/intera_interface/scripts/send_urdf_fragment.py -f /home/radhen/catkin_ws/src/intera_common/intera_tools_description/urdf/pneumatic_gripper/example_end_effector.urdf.xacro -d 1000000
+python /home/radhen/catkin_ws/src/intera_sdk/intera_interface/scripts/send_urdf_fragment.py -f /home/radhen/catkin_ws/src/intera_common/intera_tools_description/urdf/pneumatic_gripper/bebionicfinger.urdf.xacro -d 1000000
 

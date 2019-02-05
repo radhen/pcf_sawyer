@@ -17,8 +17,8 @@ class Orientations:
     )
 
     DOWNWARD_POINT = Quaternion(
-        x=1,
-        y=0,
+        x=0,
+        y=1,
         z=0,
         w=0,
     )

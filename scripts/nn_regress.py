@@ -155,10 +155,7 @@ targets = preprocessData(targets)
 
 # Divide our data into training and test sets.
 # Splitting this way selects points at random from the dataset. Does it matter? Does sorting the data matter
-train_features, test_features, train_targets, test_targets = train_test_split(features,
-                                                                            targets,
-                                                                            test_size=0.2,
-                                                                            random_state=0)
+train_features, test_features, train_targets, test_targets = train_test_split(features,targets,test_size=0.2,random_state=0)
 
 # Re-shaping after train test split to create a buffer of window size WS (below)
 WS = 50
