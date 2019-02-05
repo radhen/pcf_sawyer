@@ -131,14 +131,14 @@ def main():
         nargs='+', default=[0, 0, 0, 1, 0, 0, 0],
         help="Specify the reference frame for the interaction controller -- first 3 values are positions [m] and last 4 values are orientation in quaternion (w, x, y, z) which has to be normalized values")
     parser.add_argument(
-        "-ef",  "--in_endpoint_frame", action='store_true', default=True,
+        "-ef",  "--in_endpoint_frame", action='store_true', default=False,
         help="Set the desired reference frame to endpoint frame; otherwise, it is base frame by default")
     parser.add_argument(
         "-en",  "--endpoint_name", type=str, default='right_gripper',
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[0.0, 0.0, 5.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, -5.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
@@ -214,21 +214,12 @@ def main():
 
         for i in range(2 * args.roll_steps + 1):
 
-            gd = GetData()
-            gd.start_recording()
+            for k in range(5):
 
-            for k in range(10):
+                # move_arm(limb, [0.7,0.0,0.185], roll_angle, pitch_angle)
 
-                move_arm(limb, [0.7,0.0,0.185], roll_angle, pitch_angle)
-
-                for _ in range(15):
-                    # print the resultant interaction options once
-                    rospy.loginfo(interaction_options.to_msg())
-                    ic_pub.send_command(interaction_options, args.rate)
-                    if args.rate == 0:
-                        rospy.sleep(1)
-                    args.force_command[2] += 2
-                    interaction_options.set_force_command(args.force_command)
+                gd = GetData()
+                gd.start_recording()
 
                 for _ in range(15):
                     # print the resultant interaction options once
@@ -237,6 +228,15 @@ def main():
                     if args.rate == 0:
                         rospy.sleep(1)
                     args.force_command[2] -= 2
+                    interaction_options.set_force_command(args.force_command)
+
+                for _ in range(15):
+                    # print the resultant interaction options once
+                    rospy.loginfo(interaction_options.to_msg())
+                    ic_pub.send_command(interaction_options, args.rate)
+                    if args.rate == 0:
+                        rospy.sleep(1)
+                    args.force_command[2] += 2
                     interaction_options.set_force_command(args.force_command)
 
                 gd.stop_recording()
@@ -249,7 +249,7 @@ def main():
             roll_angle -= args.roll_step_size
             move_arm(limb, xyz, roll_angle, pitch_angle)
 
-            args.force_command[2] = 5
+            args.force_command[2] = -5
 
         # reset roll angle
         roll_angle = args.roll_step_size * args.roll_steps

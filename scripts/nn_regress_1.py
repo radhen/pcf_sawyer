@@ -31,7 +31,7 @@ data_pitch = {}
 data_cycles = {}
 for i in range(1): # roll
     for j in range(3): # pitch
-        for k in range(10): # load-unload cycles
+        for k in range(5): # load-unload cycles
             data_cycles[k] = np.loadtxt(folderIN + '/lr_bf_{}_{}_{}.txt'.format(i,j,k))
         data_pitch[j] = data_cycles
         data_cycles = {}
@@ -43,7 +43,7 @@ data_all = data_pitch
 for i in range(len(data_all)):
     plt.figure()
     for j in range(len(data_all[0])):
-        plt.plot(data_all[i][j][:,15])
+        plt.plot(data_all[i][j][100:,14])
 plt.show()
 print ('wait')
 
