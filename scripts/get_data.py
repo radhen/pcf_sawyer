@@ -119,7 +119,7 @@ class GetData(object):
 
     def convertandsave(self,i,j,k):
         # convert to numpy array and save
-        path = '/home/radhen/Documents/expData/motion3/lr_bf_probeUP/bf'
+        path = '/home/radhen/Documents/expData/motion3/lr_bf_probeUP/lr_1'
 
         # np.savetxt(path+'/pcf_data_{}.txt'.format(i), self.pcf_data)
         # np.savetxt(path+'/endeff_data_{}.txt'.format(i), self.endeff_data)
