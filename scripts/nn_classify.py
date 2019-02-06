@@ -32,7 +32,7 @@ data_roll_cycles = {}
 data_pitch_cycles = {}
 for i in range(1): # roll | pitch
     for j in range(3): # pitch | roll
-        for k in range(5): # load-unload cycles
+        for k in range(25): # load-unload cycles
             data_pitch_cycles[k] = np.loadtxt(folderIN + 'bf' + '/lr_bf_{}_{}_{}.txt'.format(i,j,k))
             data_roll_cycles[k] = np.loadtxt(folderIN + 'lr' + '/lr_bf_{}_{}_{}.txt'.format(j, i, k))
         data_roll[j] = data_roll_cycles
@@ -51,18 +51,20 @@ order = 1
 fs = 40.0       # sample rate, Hz
 cutoff = 0.5  # desired cutoff frequency of the filter, Hz
 b, a = butter_lowpass(cutoff, fs, order)
-for i in range(5): # roll | pitch
-    for j in range(5): # load-unload cycles
+for i in range(len(data_all)): # roll | pitch
+    for j in range(len(data_all[0])): # load-unload cycles
         baro_lowpassed = butter_lowpass_filter(data_all[i][j][:,14], cutoff, fs, order)
         data_all[i][j][:,14] = baro_lowpassed
+        data_all[i][j][:, 10] = np.sqrt(np.power(data_all[i][j][:, 10],2) + np.power(data_all[i][j][:, 9],2) + np.power(data_all[i][j][:, 8],2))
         force_lowpassed = butter_lowpass_filter(data_all[i][j][:, 10], cutoff, fs, order)
         data_all[i][j][:, 10] = force_lowpassed
+        data_all[i][j][:, 10] /= 35
 
 
 # for i in range(len(data_all)):
 #     plt.figure()
 #     for j in range(len(data_all[0])):
-#         plt.plot(data_all[i][j][100:,14], '+')
+#         plt.plot(data_all[i][j][100:,10])
 # plt.show()
 # print ('wait')
 
@@ -84,7 +86,7 @@ for i in range(len(data_all)):
 # THESE TWO ARRAY ESSENTIALLY DECIDE THE SHAPE OF THE INPUT AND OUPUT LAYERS OF THE NN
 # FEATURES (Xs) and TARGETS (Ys) ARE ADVISED TO BE SHAPED ACCOR.
 X = np.zeros((noe, WS, 2))
-Y = np.zeros((noe, 6))
+Y = np.zeros((noe, 1))
 
 for i in range(len(data_all)):
     y_label = np.zeros(5)
@@ -94,7 +96,8 @@ for i in range(len(data_all)):
         for k in range(data_all[i][j].shape[0]-WS-1):
             X[count,:,:] = data_all[i][j][k:WS+k,14:16] # baro, ir
             Y[count, 0] = data_all[i][j][WS+k, 10] # Force
-            Y[count, 1:6] = y_label
+            # Y[count, 1:6] = y_label
+            # Y[count, 1:
             count += 1
 
 
@@ -103,34 +106,34 @@ print(noe)
 # X[:,:,0] /= np.power(2,24)
 # X[:,:,1] /= np.power(2,16)
 
-train_x, test_x, train_y, test_y = train_test_split(X,Y,test_size=0.2,random_state=0)
+train_x, test_x, train_y, test_y = train_test_split(X,Y,test_size=0.3,random_state=0, shuffle=True)
 
 # Start neural network
 network = models.Sequential()
-network.add(Conv1D(filters=8, kernel_size=4, input_shape=(WS, 2)))
-network.add(MaxPooling1D(2))
-network.add(Conv1D(filters=32, kernel_size=4))
-network.add(MaxPooling1D(4))
+network.add(Conv1D(filters=4, kernel_size=4, input_shape=(WS, 2)))
+# network.add(MaxPooling1D(2))
+network.add(Conv1D(filters=4, kernel_size=4))
+# network.add(MaxPooling1D(4))
 network.add(Flatten())
 # network.add(layers.Dense(units=64, activation='relu'))
-network.add(layers.Dense(units=42, activation='tanh'))
-network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
-network.add(layers.Dense(units=28, activation='tanh'))
-network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
-network.add(layers.Dense(units=18, activation='tanh'))
-network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
-network.add(layers.Dense(units=12, activation='tanh'))
-network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
-network.add(layers.Dense(units=8, activation='tanh'))
-network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
-network.add(layers.Dense(units=6, activation='softmax'))
+network.add(layers.Dense(units=42, activation='relu'))
+# network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
+network.add(layers.Dense(units=28, activation='relu'))
+# network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
+network.add(layers.Dense(units=18, activation='relu'))
+# network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
+network.add(layers.Dense(units=12, activation='relu'))
+# network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
+network.add(layers.Dense(units=8, activation='relu'))
+# network.add(layers.Dropout(rate=0.2, noise_shape=None, seed=None))
+network.add(layers.Dense(units=6.))
 
-network.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
+network.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])
 
 print (network.summary())
 
 # Checkpoint. Useful link: https://machinelearningmastery.com/check-point-deep-learning-models-keras/
-filepath="calssifier_weights.best.hdf5"
+filepath="classifier.weights.best.hdf5"
 checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 
@@ -143,7 +146,7 @@ history = network.fit(train_x, # Features
                       validation_data=(test_x, test_y), # Data for evaluation
                       callbacks=callbacks_list)
 
-loss_and_metrics = network.evaluate(test_x, test_y, batch_size=2)
+loss_and_metrics = network.evaluate(test_x, test_y, batch_size=10)
 print (loss_and_metrics)
 
 # https://machinelearningmastery.com/save-load-keras-deep-learning-models/

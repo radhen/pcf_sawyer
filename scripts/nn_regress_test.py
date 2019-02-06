@@ -39,8 +39,8 @@ class RealTimeTesting(object):
             with graph.as_default():
                 y_predict = loaded_model.predict(self.arr_3d)
                 print (y_predict)
-                y_predict = [y_predict[0,0], y_predict[0,1], y_predict[0,2]]
-                msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 3, 1)], 1), y_predict)
+                y_predict = [y_predict[0,0]]
+                msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
                 self.predict.publish(msg)
 
     def plot_func(self, msg):
@@ -61,12 +61,12 @@ if __name__ == "__main__":
 
     # load json and create model
     # https://machinelearningmastery.com/save-load-keras-deep-learning-models/
-    json_file = open('motion3_model.json', 'r')
+    json_file = open('model.classifier.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     loaded_model = model_from_json(loaded_model_json)
     # load weights into new model
-    loaded_model.load_weights("motion3_weights.best.hdf5")
+    loaded_model.load_weights("classifier.weights.best.hdf5")
     print("Loaded model from disk")
     # evaluate loaded model on test data
     loaded_model.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])
