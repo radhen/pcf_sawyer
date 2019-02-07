@@ -14,8 +14,8 @@ class RealTimeTesting(object):
 
     def __init__(self):
 
-        self.ws = 100
-        self.arr = np.empty((1,2))
+        self.ws = 500
+        self.arr = np.empty((2,1))
         self.arr_3d = np.empty((1,self.ws,2))
 
         # self.fig = plt.figure()
@@ -30,22 +30,37 @@ class RealTimeTesting(object):
 
 
     def pcf_sub_func(self, msg, loaded_model):
-        # print (msg.data[0])
-        self.arr = np.append(self.arr, [[msg.data[0], msg.data[1]]], axis=0)
-        if (self.arr.shape[0] >= self.ws):
-            ws_0 = self.arr.shape[0] - self.ws
-            # print ("(" + str(0 + ws_0) + " , " + str(self.ws + ws_0) + ")")
-            self.arr_3d = self.arr[0+ws_0 : self.ws+ws_0].reshape(1,self.ws,2)
-            with graph.as_default():
-                y_predict = loaded_model.predict(self.arr_3d)
-                print (y_predict)
-                y_predict = [y_predict[0,0]]
-                msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
-                self.predict.publish(msg)
 
-    def plot_func(self, msg):
-        self.im.set_array(np.random.random((3, 3)))
-        self.fig.canvas.draw()
+        # print (msg.data[0])
+
+        ############# PASSING DATA WITH WINDOW TECHNIQUE #################
+        # self.arr = np.append(self.arr, [[msg.data[0], msg.data[1]]], axis=0)
+        # if (self.arr.shape[0] >= self.ws):
+        #     ws_0 = self.arr.shape[0] - self.ws
+        #     # print ("(" + str(0 + ws_0) + " , " + str(self.ws + ws_0) + ")")
+        #     self.arr_3d = self.arr[0+ws_0 : self.ws+ws_0].reshape(1,self.ws,2)
+        #     with graph.as_default():
+        #         y_predict = loaded_model.predict(self.arr_3d)
+        #         print (y_predict)
+        #         y_predict = [y_predict[0,0]]
+        #         msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
+        #         self.predict.publish(msg)
+
+        ################## PASSING DATA POINT BY POINT ######################
+        # self.arr = np.asarray([msg.data[0], msg.data[1]])
+        # print (self.arr.shape)
+        arr = np.array([[msg.data[0]],[msg.data[1]]])
+        with graph.as_default():
+            y_predict = loaded_model.predict(arr.T)
+        print (y_predict)
+        # y_predict = [y_predict[0, 0]]
+        # msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
+        # self.predict.publish(msg)
+
+
+    # def plot_func(self, msg):
+    #     self.im.set_array(np.random.random((3, 3)))
+    #     self.fig.canvas.draw()
 
 
     def listener(self, loaded_model):
@@ -69,7 +84,7 @@ if __name__ == "__main__":
     loaded_model.load_weights("classifier.weights.best.hdf5")
     print("Loaded model from disk")
     # evaluate loaded model on test data
-    loaded_model.compile(loss='mse', optimizer='RMSprop', metrics=['mse'])
+    loaded_model.compile(loss='mse', optimizer='Adam', metrics=['mse'])
 
     # keras issue: solution https://github.com/matsui528/sis/issues/1
     global graph
