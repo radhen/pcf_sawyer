@@ -7,8 +7,10 @@ from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimensio
 import numpy as np
 
 
+NUM_ANALOG_VAL = 6
+
 def collect_data(port='/dev/ttyACM0'):
-    with serial.Serial(port, 9600, timeout=0.1) as ser:
+    with serial.Serial(port, 115200, timeout=0.1) as ser:
         ser.flushInput()
         # Give it some time to initialize
         data = []
@@ -30,7 +32,7 @@ def collect_data(port='/dev/ttyACM0'):
                 continue
             try:
                 values = [float(i) for i in last_full_line.split()]
-                if len(values) == 2:
+                if len(values) == NUM_ANALOG_VAL:
                     # rospy.loginfo(values)
                     yield values
             except ValueError:
@@ -56,7 +58,7 @@ def sensor_node():
         # values = np.concatenate((sample_b, sample_ir), axis=1)
         # values = [values[0, 0], values[0, 1]]
         msg = Float32MultiArray(
-            MultiArrayLayout([MultiArrayDimension('sensor data', 2, 1)], 1),
+            MultiArrayLayout([MultiArrayDimension('sensor data', NUM_ANALOG_VAL, 1)], 1),
             values)
         pub.publish(msg)
         rate.sleep()

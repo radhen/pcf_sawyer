@@ -53,9 +53,9 @@ class RealTimeTesting(object):
         with graph.as_default():
             y_predict = loaded_model.predict(arr.T)
         print (y_predict)
-        # y_predict = [y_predict[0, 0]]
-        # msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
-        # self.predict.publish(msg)
+        y_predict = [y_predict[0, 0]]
+        msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
+        self.predict.publish(msg)
 
 
     # def plot_func(self, msg):
