@@ -7,9 +7,9 @@ from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimensio
 import numpy as np
 
 
-NUM_ANALOG_VAL = 3 #number of values read from the serial port
+NUM_ANALOG_VAL = 12 #number of values read from the serial port
 
-def collect_data(port='/dev/ttyACM1'):
+def collect_data(port='/dev/ttyACM0'):
     with serial.Serial(port, 115200, timeout=0.1) as ser:
         ser.flushInput()
         # Give it some time to initialize

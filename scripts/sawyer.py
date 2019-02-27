@@ -127,8 +127,8 @@ def main():
     limb_name = "right"
     limb = init_robot(limb_name=limb_name)
 
-    goto_EE_xyz(limb=limb, xyz=[0.8, 0.0, 0.0], orientation=Orientations.FORWARD_POINT, rest_pos=True)
-    [0.89208, 0.0, -0.19]
+    goto_EE_xyz(limb=limb, xyz=[0.7, 0.0, 0.3], orientation=Orientations.DOWNWARD_POINT, rest_pos=True)
+    # [0.89208, 0.0, -0.19]
 
 
     # gd = GetData()

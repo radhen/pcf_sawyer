@@ -62,7 +62,7 @@ def init_robot(limb_name):
                         "Exiting."), "ERROR")
         return
     limb = intera_interface.Limb(limb_name)
-    limb.set_joint_position_speed(0.05)
+    limb.set_joint_position_speed(0.06)
     return limb
 
 
@@ -93,7 +93,7 @@ def main():
         nargs='+',default=1, help="Number of rotations on one side")
     parser.add_argument(
         "-rollss", "--roll_step_size", type=float,
-        nargs='+', default=45, help="Size of roll in degree")
+        nargs='+', default=30, help="Size of roll in degree")
     parser.add_argument(
         "-pitchs", "--pitch_steps", type=float,
         nargs='+', default=0, help="Number of rotations on one side")
@@ -106,10 +106,10 @@ def main():
         default=[0.158984375, 0.665759765625, -1.53172265625, 1.0492724609375, 0.8098212890625, -1.0504248046875, 2.89727734375],
         help="A list of joint angles, one for each of the 7 joints, J0...J6")
     parser.add_argument(
-        "-sr", "--speed_ratio", type=float, default=0.05,
+        "-sr", "--speed_ratio", type=float, default=0.06,
         help="A value between 0.001 (slow) and 1.0 (maximum joint velocity)")
     parser.add_argument(
-        "-a", "--accel_ratio", type=float, default=0.05,
+        "-a", "--accel_ratio", type=float, default=0.06,
         help="A value between 0.001 (slow) and 1.0 (maximum joint accel)")
     parser.add_argument(
         "-s",  "--interaction_active", type=int, default=1, choices = [0, 1],
@@ -138,7 +138,7 @@ def main():
         help="Set the desired endpoint frame by its name; otherwise, it is right_hand frame by default")
     parser.add_argument(
         "-f", "--force_command", type=float,
-        nargs='+', default=[0.0, 0.0, 5.0, 0.0, 0.0, 0.0],
+        nargs='+', default=[0.0, 0.0, 6.0, 0.0, 0.0, 0.0],
         help="A list of desired force commands, one for each of the 6 directions -- in force control mode this is the vector of desired forces/torques to be regulated in (N) and (Nm), in impedance with force limit mode this vector specifies the magnitude of forces/torques (N and Nm) that the command will not exceed")
     parser.add_argument(
         "-kn", "--K_nullspace", type=float,
@@ -214,14 +214,14 @@ def main():
 
         for i in range(2 * args.roll_steps + 1):
 
-            for k in range(20):
+            for k in range(5):
 
-                move_arm(limb, [0.7,0.0,0.185], roll_angle, pitch_angle)
+                move_arm(limb, [0.7,0.0,0.175], roll_angle, pitch_angle)
 
                 gd = GetData()
                 gd.start_recording()
 
-                for _ in range(15):
+                for _ in range(10):
                     # print the resultant interaction options once
                     rospy.loginfo(interaction_options.to_msg())
                     ic_pub.send_command(interaction_options, args.rate)
@@ -230,7 +230,7 @@ def main():
                     args.force_command[2] += 2
                     interaction_options.set_force_command(args.force_command)
 
-                for _ in range(15):
+                for _ in range(10):
                     # print the resultant interaction options once
                     rospy.loginfo(interaction_options.to_msg())
                     ic_pub.send_command(interaction_options, args.rate)
@@ -249,7 +249,7 @@ def main():
             roll_angle -= args.roll_step_size
             move_arm(limb, xyz, roll_angle, pitch_angle)
 
-            args.force_command[2] = 5
+            args.force_command[2] = 6
 
         # reset roll angle
         roll_angle = args.roll_step_size * args.roll_steps

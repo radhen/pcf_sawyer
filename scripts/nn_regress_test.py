@@ -49,13 +49,20 @@ class RealTimeTesting(object):
         ################## PASSING DATA POINT BY POINT ######################
         # self.arr = np.asarray([msg.data[0], msg.data[1]])
         # print (self.arr.shape)
-        arr = np.array([[msg.data[0]],[msg.data[1]]])
+        # print msg.data[0]/6140000
+
+
+        baro = msg.data[0] / 6680000.0
+        ir = msg.data[1] / 17000.0
+        arr = np.array([[ir],[baro]])
+        # print arr.shape
         with graph.as_default():
             y_predict = loaded_model.predict(arr.T)
-        print (y_predict)
+        print (y_predict[0,0])
+
         y_predict = [y_predict[0, 0]]
-        msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
-        self.predict.publish(msg)
+        # msg = Float32MultiArray(MultiArrayLayout([MultiArrayDimension('nn_predictions', 1, 1)], 1), y_predict)
+        # self.predict.publish(msg)
 
 
     # def plot_func(self, msg):
@@ -76,15 +83,16 @@ if __name__ == "__main__":
 
     # load json and create model
     # https://machinelearningmastery.com/save-load-keras-deep-learning-models/
-    json_file = open('model.classifier.json', 'r')
+    json_file = open('dragon.model.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     loaded_model = model_from_json(loaded_model_json)
     # load weights into new model
-    loaded_model.load_weights("classifier.weights.best.hdf5")
+    loaded_model.load_weights("dragon.weights.best.hdf5")
     print("Loaded model from disk")
     # evaluate loaded model on test data
     loaded_model.compile(loss='mse', optimizer='Adam', metrics=['mse'])
+    print "complied"
 
     # keras issue: solution https://github.com/matsui528/sis/issues/1
     global graph
