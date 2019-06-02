@@ -23,7 +23,7 @@ class GetData(object):
     def __init__(self):
         self.pcf_data = np.empty((1,4))
         self.endeff_data = np.empty((1,15))
-        self.data = np.empty((1,16))
+        self.data = np.empty((1,8))
         # self.gg = grasp_generator()
 
     def start_recording(self):
@@ -39,30 +39,51 @@ class GetData(object):
         self.ft_sub = Subscriber("/robot/limb/right/endpoint_state", EndpointState)
         self.pose_sub = Subscriber("/new_right_gripper_frame", PoseStamped)
 
-        ats = ApproximateTimeSynchronizer([self.pcf_sub, self.ft_sub, self.pose_sub], queue_size=5, slop=0.1, allow_headerless=True)
+        # ats = ApproximateTimeSynchronizer([self.pcf_sub, self.ft_sub, self.pose_sub], queue_size=5, slop=0.1, allow_headerless=True)
+        # ats.registerCallback(self.got_data)
+
+        ats = ApproximateTimeSynchronizer([self.pcf_sub, self.ft_sub], queue_size=5, slop=0.1,allow_headerless=True)
         ats.registerCallback(self.got_data)
 
 
-    def got_data(self, float32MultiArray, endpointState, posestamped):
+    # def got_data(self, float32MultiArray, endpointState, posestamped):
+    #     # print float32MultiArray.data[0]
+    #     # print endpointState.pose.position.x
+    #
+    #     ################## TIME ######################
+    #     sec = posestamped.header.stamp.secs
+    #     nsec = posestamped.header.stamp.nsecs
+    #     ################## POSE ######################
+    #     px = posestamped.pose.position.x
+    #     py = posestamped.pose.position.y
+    #     pz = posestamped.pose.position.z
+    #     ox = posestamped.pose.orientation.x
+    #     oy = posestamped.pose.orientation.y
+    #     oz = posestamped.pose.orientation.z
+    #     ow = posestamped.pose.orientation.w
+    #
+    #     # save euler angles instead of quaternions
+    #     # helpful link: http://www.theconstructsim.com/ros-qa-how-to-convert-quaternions-to-euler-angles/
+    #     orientation_list = [ox, oy, oz, ow]
+    #     (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
+    #
+    #     ################## ForceTorque ###############
+    #     fx = endpointState.wrench.force.x
+    #     fy = endpointState.wrench.force.y
+    #     fz = endpointState.wrench.force.z
+    #     tx = endpointState.wrench.torque.x
+    #     ty = endpointState.wrench.torque.y
+    #     tz = endpointState.wrench.torque.z
+    #     ############### PCF data #####################
+    #     baro = float32MultiArray.data[0]
+    #     ir = float32MultiArray.data[1]
+    #
+    #     self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, roll, pitch, yaw, fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
+
+
+    def got_data(self, float32MultiArray, endpointState):
         # print float32MultiArray.data[0]
         # print endpointState.pose.position.x
-
-        ################## TIME ######################
-        sec = posestamped.header.stamp.secs
-        nsec = posestamped.header.stamp.nsecs
-        ################## POSE ######################
-        px = posestamped.pose.position.x
-        py = posestamped.pose.position.y
-        pz = posestamped.pose.position.z
-        ox = posestamped.pose.orientation.x
-        oy = posestamped.pose.orientation.y
-        oz = posestamped.pose.orientation.z
-        ow = posestamped.pose.orientation.w
-
-        # save euler angles instead of quaternions
-        # helpful link: http://www.theconstructsim.com/ros-qa-how-to-convert-quaternions-to-euler-angles/
-        orientation_list = [ox, oy, oz, ow]
-        (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
 
         ################## ForceTorque ###############
         fx = endpointState.wrench.force.x
@@ -72,10 +93,10 @@ class GetData(object):
         ty = endpointState.wrench.torque.y
         tz = endpointState.wrench.torque.z
         ############### PCF data #####################
-        baro = float32MultiArray.data[0]
-        ir = float32MultiArray.data[1]
+        ir = float32MultiArray.data[0]
+        baro = float32MultiArray.data[1]
 
-        self.data = np.append(self.data, np.array([[sec, nsec, px, py, pz, roll, pitch, yaw, fx, fy, fz, tx, ty, tz, baro, ir]]), axis=0)
+        self.data = np.append(self.data, np.array([[fx, fy, fz, tx, ty, tz, ir, baro]]), axis=0)
 
 
     def pcf_callback(self, data):
@@ -119,12 +140,15 @@ class GetData(object):
 
     def convertandsave(self,i,j,k):
         # convert to numpy array and save
-        path = '/home/radhen/Documents/pcf_expData/motion3/lr_bf_probeUP_dragon/lr_1'
+        path = '/home/radhen/Documents/pcf_expData/quality_control_testing/repeatability'
 
         # np.savetxt(path+'/pcf_data_{}.txt'.format(i), self.pcf_data)
         # np.savetxt(path+'/endeff_data_{}.txt'.format(i), self.endeff_data)
 
-        np.savetxt(path + '/lr_bf_{}_{}_{}.txt'.format(i,j,k), self.data)
+        # use this to save each poke (loading+unloading curve) in separate file
+        # np.savetxt(path + '/lr_bf_{}_{}_{}.txt'.format(i,j,k), self.data)
+
+        np.savetxt(path + '/IDB_pokes{}_5.txt'.format(k), self.data)
 
 
 

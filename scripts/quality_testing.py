@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
 '''
-motion3_lr applies varying load forces at varying roll angles. Robot control is in joint space.
+This scripts does the quality control testing. Basically it makes the Sawyer robot poke the sensor multiple times
+from the normal direction. Video is "My Drive/Cleveland Contract/Videos" on the Google Drive named quality_control_testing.mp4
 '''
 
 import rospy

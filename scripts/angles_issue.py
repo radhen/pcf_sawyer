@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+'''
+Run this ROS node to create a pseudo frame to save the proper
+oreintation of the end-effector of the Sawyer robot
+'''
+
 import rospy
 import tf
 import tf2_ros
