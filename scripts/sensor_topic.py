@@ -7,10 +7,10 @@ from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimensio
 import numpy as np
 
 
-NUM_ANALOG_VAL = 2 #number of values read from the serial port
+NUM_ANALOG_VAL = 1 #number of values read from the serial port
 
 def collect_data(port='/dev/ttyACM0'):
-    with serial.Serial(port, 115200, timeout=0.1) as ser:
+    with serial.Serial(port, 115200, timeout=0.5) as ser:
         ser.flushInput()
         # Give it some time to initialize
         data = []
@@ -21,7 +21,7 @@ def collect_data(port='/dev/ttyACM0'):
             rospy.sleep(1)
         print('\n'.join(filter(None, data)))
         buffer = []
-        r = rospy.Rate(300)
+        r = rospy.Rate(100)
         while not rospy.is_shutdown():
             buffer.append(ser.read(ser.inWaiting()))
             foo = ''.join(buffer).splitlines()
@@ -48,7 +48,7 @@ def sensor_node():
     c = collect_data()
     #c = collect_data(port='/dev/ttyACM1')
     pub = rospy.Publisher('/sensor_values', Float32MultiArray, queue_size=10)
-    rate = rospy.Rate(500)
+    rate = rospy.Rate(100)
     while not rospy.is_shutdown():
         #***** data from arduino ******#
         values = next(c)
