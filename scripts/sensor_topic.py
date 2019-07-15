@@ -5,6 +5,7 @@ import serial
 import rospy
 from std_msgs.msg import Float32MultiArray, MultiArrayLayout, MultiArrayDimension
 import numpy as np
+from scipy.signal import detrend
 
 
 NUM_ANALOG_VAL = 1 #number of values read from the serial port
@@ -50,19 +51,33 @@ def sensor_node():
     pub = rospy.Publisher('/sensor_values', Float32MultiArray, queue_size=10)
     rate = rospy.Rate(100)
     while not rospy.is_shutdown():
+
         #***** data from arduino ******#
         values = next(c)
+        # print (type(values))
+        # np.asarray(values)
+        buffer.pop(0)
+        buffer.append(values[0])
+        x = detrend(buffer)
+        value = [x[0]]
+
         #****** fake signal generation *****#
         # sample_b = np.random.uniform(low=0.0, high=0.5, size=(1, 1))
         # sample_ir = np.random.uniform(low=-0.0, high=0.6, size=(1, 1))
         # values = np.concatenate((sample_b, sample_ir), axis=1)
         # values = [values[0, 0], values[0, 1]]
+
+        #******* publish the sensor values ****#
         msg = Float32MultiArray(
             MultiArrayLayout([MultiArrayDimension('sensor data', NUM_ANALOG_VAL, 1)], 1),
-            values)
+            value)
         pub.publish(msg)
         rate.sleep()
 
 if __name__ == '__main__':
     rospy.init_node('sensor_node')
+    BUFFER_LEN = 80
+    buffer = []
+    for i in range(BUFFER_LEN):
+        buffer += [0]
     s = sensor_node()
