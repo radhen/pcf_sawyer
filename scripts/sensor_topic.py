@@ -34,7 +34,7 @@ def collect_data(port='/dev/ttyACM0'):
             try:
                 values = [float(i) for i in last_full_line.split()]
                 if len(values) == NUM_ANALOG_VAL:
-                    # rospy.loginfo(values)
+                    rospy.loginfo(values)
                     yield values
             except ValueError:
                 # rospy.loginfo(last_full_line)
@@ -49,7 +49,7 @@ def sensor_node():
     c = collect_data()
     #c = collect_data(port='/dev/ttyACM1')
     pub = rospy.Publisher('/sensor_values', Float32MultiArray, queue_size=10)
-    rate = rospy.Rate(100)
+    rate = rospy.Rate(150)
     while not rospy.is_shutdown():
 
         #***** data from arduino ******#
