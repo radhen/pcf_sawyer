@@ -90,7 +90,7 @@ def main():
                                          max_rotational_speed=args.rotational_speed,
                                          max_rotational_accel=args.rotational_accel,
                                          max_joint_speed_ratio=1.0)
-        waypoint = MotionWaypoint(options = wpt_opts.to_msg(), limb = limb, active_endpoint='right_hand')
+        waypoint = MotionWaypoint(options = wpt_opts.to_msg(), limb = limb, active_endpoint='right_')
 
         joint_names = limb.joint_names()
 
